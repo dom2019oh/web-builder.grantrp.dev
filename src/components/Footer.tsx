@@ -19,31 +19,31 @@ const Footer = () => {
             </p>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-foreground mb-4">Product</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
-                  Features
-                </Link>
-              </li>
-              <li>
-                <Link to="/#templates" className="text-muted-foreground hover:text-primary transition-colors">
-                  Templates
-                </Link>
-              </li>
-              <li>
-                <Link to="/#pricing" className="text-muted-foreground hover:text-primary transition-colors">
-                  Pricing
-                </Link>
-              </li>
-              <li>
-                <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors">
-                  Dashboard
-                </Link>
-              </li>
-            </ul>
-          </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-4">Company</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
+                    Features
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/#templates" className="text-muted-foreground hover:text-primary transition-colors">
+                    Templates
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/#pricing" className="text-muted-foreground hover:text-primary transition-colors">
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">
+                    Contact
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
           <div>
             <h3 className="font-semibold text-foreground mb-4">Legal</h3>

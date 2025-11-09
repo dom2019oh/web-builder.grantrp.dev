@@ -28,7 +28,7 @@ const Features = () => {
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Aurora background layer */}
-      <div className="absolute inset-0 bg-gradient-aurora-teal opacity-30 aurora-animate" style={{ backgroundSize: '200% 200%' }} />
+      <div className="absolute inset-0 bg-gradient-aurora-teal opacity-15 aurora-animate" style={{ backgroundSize: '200% 200%' }} />
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">

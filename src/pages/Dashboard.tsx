@@ -11,7 +11,7 @@ const Dashboard = () => {
     <div className="min-h-screen relative overflow-hidden">
       <InteractiveLighting />
       {/* Aurora background */}
-      <div className="absolute inset-0 bg-gradient-aurora-magenta aurora-animate opacity-50" style={{ backgroundSize: '200% 200%' }} />
+      <div className="absolute inset-0 bg-gradient-aurora-magenta aurora-animate opacity-20" style={{ backgroundSize: '200% 200%' }} />
       
       <Navigation />
 

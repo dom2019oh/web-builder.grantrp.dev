@@ -6,15 +6,15 @@ const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Aurora Background with animated gradients */}
-      <div className="absolute inset-0 bg-gradient-aurora-magenta aurora-animate opacity-90" 
+      <div className="absolute inset-0 bg-gradient-aurora-magenta aurora-animate opacity-30" 
            style={{ backgroundSize: '200% 200%' }} />
       
       {/* Grid overlay with aurora reflection */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
       
       {/* Floating orbs */}
-      <div className="absolute top-20 left-20 w-96 h-96 bg-aurora-cyan/20 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-aurora-magenta/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-20 left-20 w-96 h-96 bg-aurora-cyan/10 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-20 right-20 w-96 h-96 bg-aurora-magenta/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
