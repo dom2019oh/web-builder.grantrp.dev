@@ -24,7 +24,7 @@ const faqs = [
   },
   {
     question: "Is there a free trial available?",
-    answer: "Yes! We offer a 14-day free trial on all plans so you can test our platform before committing. No credit card required to start."
+    answer: "Yes! We offer a 4-day free trial on all plans so you can test our platform before committing. No credit card required to start."
   },
   {
     question: "What happens to my websites if I cancel?",
@@ -35,7 +35,10 @@ const faqs = [
 const FAQ = () => {
   return (
     <section className="py-24 relative overflow-hidden">
+      {/* Aurora background effects */}
+      <div className="absolute inset-0 bg-gradient-aurora-teal opacity-10 aurora-animate" style={{ backgroundSize: '200% 200%' }} />
       <div className="absolute top-20 right-20 w-96 h-96 bg-aurora-cyan/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-aurora-magenta/10 rounded-full blur-[120px]" />
       
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center mb-16">

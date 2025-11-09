@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, Sun, Moon } from "lucide-react";
 import logo from "@/assets/logo-color.png";
 import { useState } from "react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const Navigation = () => {
   const [open, setOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass glass-glow border-b border-border">
@@ -35,13 +37,21 @@ const Navigation = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="text-foreground hover:text-primary"
+            >
+              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
             <Link to="/login">
               <Button variant="ghost" className="text-foreground">
                 Sign In
               </Button>
             </Link>
             <Link to="/signup">
-              <Button className="bg-gradient-primary hover:opacity-90 transition-opacity">
+              <Button className="bg-gradient-button border-0 shadow-glow hover:shadow-glow-magenta transition-all hover:scale-105">
                 Get Started
               </Button>
             </Link>
@@ -67,6 +77,21 @@ const Navigation = () => {
                 <Link to="/contact" onClick={() => setOpen(false)} className="text-foreground hover:text-primary transition-colors text-lg">
                   Contact
                 </Link>
+                <Button
+                  variant="ghost"
+                  onClick={toggleTheme}
+                  className="text-foreground hover:text-primary justify-start"
+                >
+                  {theme === "dark" ? (
+                    <>
+                      <Sun className="h-5 w-5 mr-2" /> Light Mode
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="h-5 w-5 mr-2" /> Dark Mode
+                    </>
+                  )}
+                </Button>
                 <div className="flex flex-col gap-3 mt-4">
                   <Link to="/login" onClick={() => setOpen(false)}>
                     <Button variant="ghost" className="w-full text-foreground">
@@ -74,7 +99,7 @@ const Navigation = () => {
                     </Button>
                   </Link>
                   <Link to="/signup" onClick={() => setOpen(false)}>
-                    <Button className="w-full bg-gradient-primary hover:opacity-90 transition-opacity">
+                    <Button className="w-full bg-gradient-button border-0 shadow-glow hover:shadow-glow-magenta transition-all">
                       Get Started
                     </Button>
                   </Link>

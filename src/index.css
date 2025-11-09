@@ -69,6 +69,56 @@ All colors MUST be HSL.
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-aurora: all 20s ease-in-out infinite;
   }
+
+  .light {
+    /* Aurora Design System Colors - Day Aurora Theme */
+    --background: 210 40% 96%;
+    --foreground: 237 47% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 237 47% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 237 47% 15%;
+
+    /* Aurora Primary Colors - Adjusted for light mode */
+    --primary: 267 100% 55%;
+    --primary-foreground: 0 0% 100%;
+    
+    --aurora-magenta: 292 98% 55%;
+    --aurora-cyan: 188 95% 45%;
+    --aurora-teal: 175 74% 41%;
+    --aurora-blue: 210 100% 45%;
+    --aurora-violet: 254 100% 55%;
+    --aurora-dark: 237 47% 25%;
+
+    --secondary: 237 20% 85%;
+    --secondary-foreground: 237 47% 15%;
+
+    --muted: 220 15% 90%;
+    --muted-foreground: 220 10% 40%;
+
+    --accent: 188 95% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 85%;
+    --input: 220 13% 90%;
+    --ring: 188 95% 45%;
+
+    /* Glass Morphism - Light mode */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(55, 231, 247, 0.2);
+    --glass-shadow: 0 0 20px rgba(100, 200, 255, 0.15);
+    --glass-glow-inner: inset 0 0 25px rgba(55, 231, 247, 0.1);
+    
+    /* Shadows & Glows - Light mode */
+    --shadow-glow: 0 0 40px rgba(55, 231, 247, 0.4);
+    --shadow-glow-magenta: 0 0 40px rgba(211, 77, 254, 0.4);
+    --shadow-card: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  }
 }
 
 @layer base {
@@ -78,8 +128,16 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    background: linear-gradient(135deg, #0a0612 0%, #050508 100%);
     scroll-behavior: smooth;
+    transition: background-color 0.3s ease;
+  }
+
+  body:not(.light) {
+    background: linear-gradient(135deg, #0a0612 0%, #050508 100%);
+  }
+
+  body.light {
+    background: linear-gradient(135deg, #e8f4f8 0%, #f0f9ff 100%);
   }
 }
 
