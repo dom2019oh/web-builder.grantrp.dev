@@ -43,10 +43,8 @@ const TemplateGallery = () => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      if (import.meta.env.DEV) {
-        console.error('Debug:', error);
-      }
       toast.error("Failed to load templates");
+      console.error(error);
     } else {
       setTemplates(data || []);
     }
@@ -71,10 +69,8 @@ const TemplateGallery = () => {
       .single();
 
     if (error) {
-      if (import.meta.env.DEV) {
-        console.error('Debug:', error);
-      }
       toast.error("Failed to clone template");
+      console.error(error);
     } else {
       toast.success("Template cloned! Starting your project...");
       navigate(`/dashboard`);

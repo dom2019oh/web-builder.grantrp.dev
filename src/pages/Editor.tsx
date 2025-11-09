@@ -85,9 +85,7 @@ const Editor = () => {
         );
       }
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Debug - Error loading project:', error);
-      }
+      console.error("Error loading project:", error);
       toast.error("Failed to load project");
       navigate("/dashboard");
     }
@@ -118,9 +116,7 @@ const Editor = () => {
 
       toast.success("Project saved!");
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Debug - Error saving project:', error);
-      }
+      console.error("Error saving project:", error);
       toast.error("Failed to save project");
     } finally {
       setIsSaving(false);

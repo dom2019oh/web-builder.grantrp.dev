@@ -49,18 +49,13 @@ const plans = [
 const Pricing = () => {
   return (
     <section id="pricing" className="py-24 relative overflow-hidden">
-      {/* Aurora background - ENHANCED */}
-      <div className="absolute inset-0 bg-gradient-aurora-teal opacity-25 aurora-animate" style={{ backgroundSize: '200% 200%' }} />
-      <div className="absolute inset-0 bg-gradient-aurora-magenta opacity-15 aurora-animate" style={{ backgroundSize: '200% 200%', animationDirection: 'reverse', animationDuration: '30s' }} />
-      
-      {/* Floating particles */}
-      <div className="absolute top-20 right-1/4 w-80 h-80 bg-aurora-violet/15 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-aurora-cyan/15 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }} />
+      {/* Aurora background */}
+      <div className="absolute inset-0 bg-gradient-aurora-teal opacity-20 aurora-animate" style={{ backgroundSize: '200% 200%' }} />
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-button bg-clip-text text-transparent" style={{ backgroundSize: '200% 200%' }}>Simple, Transparent Pricing</h2>
-          <p className="text-xl text-foreground/80">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
+          <p className="text-xl text-foreground/70">
             Choose the plan that fits your needs
           </p>
         </div>
@@ -69,13 +64,12 @@ const Pricing = () => {
           {plans.map((plan, index) => (
             <Card 
               key={index} 
-              className={`glass glass-glow hover:shadow-glow-magenta transition-all duration-500 relative border backdrop-blur-xl animate-fade-in hover:-translate-y-2 hover:scale-105 ${
-                plan.popular ? 'ring-2 ring-aurora-cyan shadow-glow border-aurora-cyan/30' : 'border-aurora-magenta/10'
+              className={`glass glass-glow hover:shadow-glow-magenta transition-all duration-300 relative border-0 ${
+                plan.popular ? 'ring-2 ring-aurora-cyan shadow-glow' : ''
               }`}
-              style={{ animationDelay: `${index * 0.15}s` }}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-1.5 bg-gradient-button rounded-full text-sm font-semibold shadow-glow-magenta animate-pulse border border-aurora-cyan/30">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-button rounded-full text-sm font-semibold shadow-glow">
                   Most Popular
                 </div>
               )}
@@ -83,8 +77,8 @@ const Pricing = () => {
                 <CardTitle className="text-2xl text-foreground">{plan.name}</CardTitle>
                 <CardDescription className="text-foreground/70">{plan.description}</CardDescription>
                 <div className="mt-4">
-                  <span className="text-5xl font-bold bg-gradient-button bg-clip-text text-transparent drop-shadow-glow">{plan.price}</span>
-                  <span className="text-foreground/70">/month</span>
+                  <span className="text-4xl font-bold bg-gradient-aurora-teal bg-clip-text text-transparent">{plan.price}</span>
+                  <span className="text-foreground/60">/month</span>
                 </div>
               </CardHeader>
               <CardContent>
@@ -98,18 +92,18 @@ const Pricing = () => {
                 </ul>
               </CardContent>
               <CardFooter>
-                  <Link to="/signup" className="w-full">
-                    <Button 
-                      className={`w-full ${
-                        plan.popular 
-                          ? 'bg-gradient-button border-0 shadow-glow-magenta hover:shadow-glow text-white hover:scale-110' 
-                          : 'glass hover:bg-gradient-button hover:border-0 hover:shadow-glow border-aurora-cyan/20 hover:scale-105'
-                      } transition-all duration-300`}
-                      variant={plan.popular ? 'default' : 'outline'}
-                    >
-                      Get Started
-                    </Button>
-                  </Link>
+                <Link to="/signup" className="w-full">
+                  <Button 
+                    className={`w-full ${
+                      plan.popular 
+                        ? 'bg-gradient-button border-0 shadow-glow hover:shadow-glow-magenta' 
+                        : 'glass hover:bg-gradient-button hover:border-0'
+                    } transition-all hover:scale-105`}
+                    variant={plan.popular ? 'default' : 'outline'}
+                  >
+                    Get Started
+                  </Button>
+                </Link>
               </CardFooter>
             </Card>
           ))}

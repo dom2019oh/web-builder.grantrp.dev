@@ -46,10 +46,8 @@ const Dashboard = () => {
       .order('updated_at', { ascending: false });
 
     if (error) {
-      if (import.meta.env.DEV) {
-        console.error('Debug:', error);
-      }
       toast.error("Failed to load projects");
+      console.error(error);
     } else {
       setProjects(data || []);
     }
@@ -66,10 +64,8 @@ const Dashboard = () => {
       .eq('user_id', user!.id);
 
     if (error) {
-      if (import.meta.env.DEV) {
-        console.error('Debug:', error);
-      }
       toast.error("Failed to delete project");
+      console.error(error);
     } else {
       toast.success("Project deleted");
       fetchProjects();
