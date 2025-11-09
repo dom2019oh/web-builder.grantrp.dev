@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import Editor from "./pages/Editor";
 import TemplateGallery from "./pages/TemplateGallery";
 import ProjectSettings from "./pages/ProjectSettings";
 import ComponentLibrary from "./pages/ComponentLibrary";
@@ -41,6 +42,7 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/editor/:projectId" element={<Editor />} />
       <Route path="/templates" element={<TemplateGallery />} />
       <Route path="/settings" element={<ProjectSettings />} />
       <Route path="/components" element={<ComponentLibrary />} />

@@ -138,10 +138,17 @@ const Dashboard = () => {
                   variant="outline"
                   size="sm"
                   className="flex-1 glass"
+                  onClick={() => navigate(`/editor/${project.id}`)}
+                >
+                  Open Editor
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="glass"
                   onClick={() => navigate(`/settings?id=${project.id}`)}
                 >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
+                  <Settings className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"

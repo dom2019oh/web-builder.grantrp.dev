@@ -41,6 +41,59 @@ export type Database = {
         }
         Relationships: []
       }
+      project_components: {
+        Row: {
+          component_id: string
+          component_type: string
+          created_at: string | null
+          height: number | null
+          id: string
+          position_x: number | null
+          position_y: number | null
+          project_id: string
+          props: Json | null
+          updated_at: string | null
+          width: number | null
+          z_index: number | null
+        }
+        Insert: {
+          component_id: string
+          component_type: string
+          created_at?: string | null
+          height?: number | null
+          id?: string
+          position_x?: number | null
+          position_y?: number | null
+          project_id: string
+          props?: Json | null
+          updated_at?: string | null
+          width?: number | null
+          z_index?: number | null
+        }
+        Update: {
+          component_id?: string
+          component_type?: string
+          created_at?: string | null
+          height?: number | null
+          id?: string
+          position_x?: number | null
+          position_y?: number | null
+          project_id?: string
+          props?: Json | null
+          updated_at?: string | null
+          width?: number | null
+          z_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_components_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           content: Json | null
