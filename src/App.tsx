@@ -11,6 +11,9 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import TemplateGallery from "./pages/TemplateGallery";
+import ProjectSettings from "./pages/ProjectSettings";
+import ComponentLibrary from "./pages/ComponentLibrary";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
@@ -38,6 +41,9 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/templates" element={<TemplateGallery />} />
+      <Route path="/settings" element={<ProjectSettings />} />
+      <Route path="/components" element={<ComponentLibrary />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms-of-use" element={<TermsOfUse />} />
