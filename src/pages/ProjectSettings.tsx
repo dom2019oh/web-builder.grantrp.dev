@@ -12,6 +12,15 @@ import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import InteractiveLighting from "@/components/InteractiveLighting";
+import { z } from "zod";
+
+const projectSettingsSchema = z.object({
+  name: z.string().trim().min(1, "Project name is required").max(100, "Name must be less than 100 characters"),
+  description: z.string().trim().max(500, "Description must be less than 500 characters").optional().or(z.literal("")),
+  seoTitle: z.string().trim().max(60, "SEO title must be less than 60 characters").optional().or(z.literal("")),
+  seoDescription: z.string().trim().max(160, "SEO description must be less than 160 characters").optional().or(z.literal("")),
+  faviconUrl: z.string().trim().max(500, "URL is too long").url("Must be a valid URL").optional().or(z.literal(""))
+});
 
 const ProjectSettings = () => {
   const navigate = useNavigate();
@@ -51,8 +60,10 @@ const ProjectSettings = () => {
       .single();
 
     if (error) {
+      if (import.meta.env.DEV) {
+        console.error('Debug:', error);
+      }
       toast.error("Failed to load project");
-      console.error(error);
     } else if (data) {
       setProjectName(data.name);
       setDescription(data.description || "");
@@ -66,22 +77,38 @@ const ProjectSettings = () => {
   const handleSave = async () => {
     if (!projectId || !user) return;
 
+    // Validate input
+    const validation = projectSettingsSchema.safeParse({
+      name: projectName,
+      description,
+      seoTitle,
+      seoDescription,
+      faviconUrl
+    });
+
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
     setSaving(true);
     const { error } = await supabase
       .from('projects')
       .update({
-        name: projectName,
-        description,
-        seo_title: seoTitle,
-        seo_description: seoDescription,
-        favicon_url: faviconUrl,
+        name: validation.data.name,
+        description: validation.data.description || null,
+        seo_title: validation.data.seoTitle || null,
+        seo_description: validation.data.seoDescription || null,
+        favicon_url: validation.data.faviconUrl || null,
       })
       .eq('id', projectId)
       .eq('user_id', user.id);
 
     if (error) {
+      if (import.meta.env.DEV) {
+        console.error('Debug:', error);
+      }
       toast.error("Failed to save settings");
-      console.error(error);
     } else {
       toast.success("Settings saved successfully!");
     }
