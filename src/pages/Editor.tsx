@@ -83,15 +83,6 @@ const Editor = () => {
 
   const checkAccessAndLoadProject = async () => {
     try {
-      // First, check if user has admin role
-      const { data: userRoles, error: roleError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user!.id);
-
-      const isAdmin = userRoles?.some(role => role.role === "admin");
-
-      // Then check if user owns the project or is an admin
       const { data: project, error: projectError } = await supabase
         .from("projects")
         .select("*")
@@ -100,8 +91,8 @@ const Editor = () => {
 
       if (projectError) throw projectError;
 
-      // Access control: only project owner or admin can access
-      if (project.user_id !== user!.id && !isAdmin) {
+      // Access control: only project owner can access
+      if (project.user_id !== user!.id) {
         toast.error("You don't have permission to access this project");
         navigate("/dashboard");
         return;
