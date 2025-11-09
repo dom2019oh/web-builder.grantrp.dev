@@ -1,43 +1,33 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { ArrowLeft, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import Hero from "@/components/Hero";
-import Features from "@/components/Features";
-import Pricing from "@/components/Pricing";
-import FAQ from "@/components/FAQ";
-import Templates from "@/components/Templates";
-import Footer from "@/components/Footer";
+import ComponentPalette from "@/components/editor/ComponentPalette";
+import EditorCanvas from "@/components/editor/EditorCanvas";
 
-interface Section {
+interface Component {
   id: string;
-  label: string;
-  component: React.ComponentType;
-  enabled: boolean;
+  component_id: string;
+  component_type: string;
+  props: any;
+  position_x: number;
+  position_y: number;
+  width: number;
+  height: number;
+  z_index: number;
 }
-
-const AVAILABLE_SECTIONS: Omit<Section, "enabled">[] = [
-  { id: "hero", label: "Hero Section", component: Hero },
-  { id: "features", label: "Features Section", component: Features },
-  { id: "templates", label: "Templates Section", component: Templates },
-  { id: "pricing", label: "Pricing Section", component: Pricing },
-  { id: "faq", label: "FAQ Section", component: FAQ },
-  { id: "footer", label: "Footer Section", component: Footer },
-];
 
 const Editor = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [projectName, setProjectName] = useState("");
-  const [sections, setSections] = useState<Section[]>(
-    AVAILABLE_SECTIONS.map(s => ({ ...s, enabled: s.id === "hero" }))
-  );
+  const [components, setComponents] = useState<Component[]>([]);
+  const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -47,6 +37,7 @@ const Editor = () => {
     }
     if (projectId) {
       checkAccessAndLoadProject();
+      loadComponents();
     }
   }, [projectId, user]);
 
@@ -77,13 +68,6 @@ const Editor = () => {
       }
 
       setProjectName(project.name);
-
-      if (project.content && typeof project.content === 'object' && 'sections' in project.content) {
-        const enabledSectionIds = project.content.sections as string[];
-        setSections(prev => 
-          prev.map(s => ({ ...s, enabled: enabledSectionIds.includes(s.id) }))
-        );
-      }
     } catch (error) {
       console.error("Error loading project:", error);
       toast.error("Failed to load project");
@@ -91,23 +75,115 @@ const Editor = () => {
     }
   };
 
+  const loadComponents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("project_components")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("z_index");
 
-  const toggleSection = (sectionId: string) => {
-    setSections(prev => 
-      prev.map(s => s.id === sectionId ? { ...s, enabled: !s.enabled } : s)
-    );
+      if (error) throw error;
+      setComponents(data || []);
+    } catch (error) {
+      console.error("Error loading components:", error);
+      toast.error("Failed to load components");
+    }
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    if (event.active.id !== "canvas") {
+      setSelectedComponent(event.active.id as string);
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, delta, over } = event;
+
+    if (over?.id === "canvas" && active.data.current?.isNew) {
+      // Create new component
+      const newComponent = {
+        project_id: projectId,
+        component_type: active.id as string,
+        component_id: active.id as string,
+        props: {},
+        position_x: Math.max(0, delta.x),
+        position_y: Math.max(0, delta.y),
+        width: 300,
+        height: 200,
+        z_index: components.length,
+      };
+
+      try {
+        const { data, error } = await supabase
+          .from("project_components")
+          .insert(newComponent)
+          .select()
+          .single();
+
+        if (error) throw error;
+        setComponents([...components, data]);
+        toast.success("Component added!");
+      } catch (error) {
+        console.error("Error adding component:", error);
+        toast.error("Failed to add component");
+      }
+    } else if (active.data.current?.isExisting) {
+      // Update existing component position
+      const component = components.find((c) => c.id === active.id);
+      if (component) {
+        const updatedComponent = {
+          ...component,
+          position_x: component.position_x + delta.x,
+          position_y: component.position_y + delta.y,
+        };
+
+        try {
+          const { error } = await supabase
+            .from("project_components")
+            .update({
+              position_x: updatedComponent.position_x,
+              position_y: updatedComponent.position_y,
+            })
+            .eq("id", component.id);
+
+          if (error) throw error;
+
+          setComponents(
+            components.map((c) => (c.id === component.id ? updatedComponent : c))
+          );
+        } catch (error) {
+          console.error("Error updating component:", error);
+          toast.error("Failed to update component");
+        }
+      }
+    }
+  };
+
+  const handleDeleteComponent = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("project_components")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setComponents(components.filter((c) => c.id !== id));
+      setSelectedComponent(null);
+      toast.success("Component deleted!");
+    } catch (error) {
+      console.error("Error deleting component:", error);
+      toast.error("Failed to delete component");
+    }
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const enabledSectionIds = sections.filter(s => s.enabled).map(s => s.id);
-      
       const { error } = await supabase
         .from("projects")
         .update({ 
-          content: { sections: enabledSectionIds },
           updated_at: new Date().toISOString() 
         })
         .eq("id", projectId);
@@ -124,96 +200,54 @@ const Editor = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* Left Sidebar - Back to Dashboard */}
-      <div className="w-16 bg-muted/30 border-r border-border flex items-start justify-center pt-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate("/dashboard")}
-          className="hover:bg-accent"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-      </div>
-
-      {/* Main Canvas Area */}
-      <div className="flex-1 overflow-auto bg-background">
-        {/* Top Header */}
-        <div className="sticky top-0 z-40 glass border-b border-border">
-          <div className="px-6 py-3 flex items-center justify-between">
-            <h1 className="text-lg font-semibold">{projectName || "Untitled Project"}</h1>
+    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className="min-h-screen flex bg-background">
+        {/* Left Sidebar - Component Palette */}
+        <div className="w-80 bg-muted/30 border-r border-border overflow-auto">
+          <div className="p-4">
             <Button
+              variant="ghost"
               size="sm"
-              onClick={handleSave}
-              disabled={isSaving}
-              className="bg-gradient-button border-0"
+              onClick={() => navigate("/dashboard")}
+              className="mb-4 w-full justify-start"
             >
-              <Save className="mr-2 h-4 w-4" />
-              {isSaving ? "Saving..." : "Save"}
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
             </Button>
+            <ComponentPalette />
           </div>
         </div>
 
-        {/* Website Preview */}
-        <div className="bg-background">
-          {sections.filter(s => s.enabled).map((section) => {
-            const Component = section.component;
-            return <Component key={section.id} />;
-          })}
-          
-          {sections.filter(s => s.enabled).length === 0 && (
-            <div className="flex items-center justify-center min-h-[60vh]">
-              <div className="text-center">
-                <p className="text-lg text-muted-foreground mb-2">Your website is empty</p>
-                <p className="text-sm text-muted-foreground">Enable sections from the right panel to get started</p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Right Sidebar - Section Toggles */}
-      <div className="w-80 bg-muted/30 border-l border-border p-6 overflow-auto">
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-lg font-semibold mb-2">Sections</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Toggle sections to customize your website
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {sections.map((section) => (
-              <div
-                key={section.id}
-                className="flex items-center space-x-3 p-3 rounded-lg glass hover:glass-glow transition-all cursor-pointer"
-                onClick={() => toggleSection(section.id)}
+        {/* Main Canvas Area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Top Header */}
+          <div className="glass border-b border-border">
+            <div className="px-6 py-3 flex items-center justify-between">
+              <h1 className="text-lg font-semibold">{projectName || "Untitled Project"}</h1>
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="bg-gradient-button border-0"
               >
-                <Checkbox
-                  id={section.id}
-                  checked={section.enabled}
-                  onCheckedChange={() => toggleSection(section.id)}
-                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                />
-                <Label
-                  htmlFor={section.id}
-                  className="text-sm font-medium cursor-pointer flex-1"
-                >
-                  {section.label}
-                </Label>
-              </div>
-            ))}
+                <Save className="mr-2 h-4 w-4" />
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
+            </div>
           </div>
 
-          <div className="pt-4 border-t border-border">
-            <p className="text-xs text-muted-foreground">
-              Drag sections to reorder (coming soon)
-            </p>
+          {/* Canvas */}
+          <div className="flex-1 overflow-auto">
+            <EditorCanvas
+              components={components}
+              selectedComponent={selectedComponent}
+              onSelectComponent={setSelectedComponent}
+              onDeleteComponent={handleDeleteComponent}
+            />
           </div>
         </div>
       </div>
-    </div>
+    </DndContext>
   );
 };
 

@@ -14,7 +14,8 @@ interface PaletteItem {
 
 const DraggableItem = ({ item }: { item: PaletteItem }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `palette-${item.id}`,
+    id: item.id,
+    data: { isNew: true },
   });
 
   return (

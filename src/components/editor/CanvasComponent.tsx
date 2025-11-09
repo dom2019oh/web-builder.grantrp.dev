@@ -27,6 +27,7 @@ interface CanvasComponentProps {
 const CanvasComponent = ({ component, isSelected, onSelect }: CanvasComponentProps) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: component.id,
+    data: { isExisting: true },
   });
 
   const style = {
