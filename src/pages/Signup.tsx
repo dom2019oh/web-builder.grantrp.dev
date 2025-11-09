@@ -6,9 +6,19 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import InteractiveLighting from "@/components/InteractiveLighting";
+import { z } from "zod";
+
+const signupSchema = z.object({
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain an uppercase letter")
+    .regex(/[a-z]/, "Password must contain a lowercase letter")
+    .regex(/[0-9]/, "Password must contain a number"),
+  fullName: z.string().trim().min(1, "Name is required").max(100, "Name must be less than 100 characters")
+});
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -27,38 +37,26 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!fullName || !email || !password) {
-      toast.error("Please fill in all fields");
-      return;
-    }
+    // Validate inputs
+    const validation = signupSchema.safeParse({
+      email,
+      password,
+      fullName
+    });
 
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
     setIsSubmitting(true);
-    const { data, error } = await signUp(email, password, fullName);
+    const { data, error } = await signUp(validation.data.email, validation.data.password, validation.data.fullName);
     
     if (error) {
       toast.error(error.message);
       setIsSubmitting(false);
     } else if (data.user) {
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            email: data.user.email!,
-            full_name: fullName,
-          }
-        ]);
-      
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
-      }
-      
       toast.success("Account created! Welcome aboard!");
       navigate("/dashboard");
     }
@@ -117,7 +115,6 @@ const Signup = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={6}
                 />
               </div>
               <Button 

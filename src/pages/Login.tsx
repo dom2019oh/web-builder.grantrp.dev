@@ -8,6 +8,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import Navigation from "@/components/Navigation";
 import InteractiveLighting from "@/components/InteractiveLighting";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().trim().email("Invalid email address"),
+  password: z.string().min(1, "Password is required")
+});
 
 const Login = () => {
   const navigate = useNavigate();
@@ -25,13 +31,20 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
-      toast.error("Please fill in all fields");
+    // Validate inputs
+    const validation = loginSchema.safeParse({
+      email,
+      password
+    });
+
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
     setIsSubmitting(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(validation.data.email, validation.data.password);
     
     if (error) {
       toast.error(error.message);
