@@ -17,7 +17,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-muted-foreground max-w-md">
-              AI-powered website builder connected to web-builder.grantrp.dev. 
+              AI-powered website builder connected to grantrp.dev. 
               Create stunning websites with cutting-edge technology.
             </p>
           </div>
@@ -86,7 +86,7 @@ const Footer = () => {
               © {new Date().getFullYear()} Grant Development™. All rights reserved.
             </p>
             <p className="text-muted-foreground text-sm">
-              Connected to web-builder.grantrp.dev
+              Connected to grantrp.dev
             </p>
           </div>
         </div>

@@ -5,10 +5,12 @@ import { Menu, Sun, Moon } from "lucide-react";
 import logo from "@/assets/logo-color.png";
 import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navigation = () => {
   const [open, setOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass glass-glow border-b border-border">
@@ -45,16 +47,20 @@ const Navigation = () => {
             >
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
-            <Link to="/login">
-              <Button variant="ghost" className="text-foreground">
-                Sign In
-              </Button>
-            </Link>
-            <Link to="/signup">
-              <Button className="bg-gradient-button border-0 shadow-glow hover:shadow-glow-magenta transition-all hover:scale-105">
-                Get Started
-              </Button>
-            </Link>
+            {!user && (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" className="text-foreground">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button className="bg-gradient-button border-0 shadow-glow hover:shadow-glow-magenta transition-all hover:scale-105">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           <Sheet open={open} onOpenChange={setOpen}>
@@ -92,18 +98,20 @@ const Navigation = () => {
                     </>
                   )}
                 </Button>
-                <div className="flex flex-col gap-3 mt-4">
-                  <Link to="/login" onClick={() => setOpen(false)}>
-                    <Button variant="ghost" className="w-full text-foreground">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link to="/signup" onClick={() => setOpen(false)}>
-                    <Button className="w-full bg-gradient-button border-0 shadow-glow hover:shadow-glow-magenta transition-all">
-                      Get Started
-                    </Button>
-                  </Link>
-                </div>
+                {!user && (
+                  <div className="flex flex-col gap-3 mt-4">
+                    <Link to="/login" onClick={() => setOpen(false)}>
+                      <Button variant="ghost" className="w-full text-foreground">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link to="/signup" onClick={() => setOpen(false)}>
+                      <Button className="w-full bg-gradient-button border-0 shadow-glow hover:shadow-glow-magenta transition-all">
+                        Get Started
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </div>
             </SheetContent>
           </Sheet>
