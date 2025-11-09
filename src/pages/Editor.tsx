@@ -2,12 +2,15 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Undo, Redo } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import ComponentPalette from "@/components/editor/ComponentPalette";
 import EditorCanvas from "@/components/editor/EditorCanvas";
+import PropertiesPanel from "@/components/editor/PropertiesPanel";
+import KeyboardShortcutsHelp from "@/components/editor/KeyboardShortcutsHelp";
+import { useUndoRedo } from "@/hooks/useUndoRedo";
 
 interface Component {
   id: string;
@@ -26,9 +29,17 @@ const Editor = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [projectName, setProjectName] = useState("");
-  const [components, setComponents] = useState<Component[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  
+  const {
+    state: components,
+    setState: setComponents,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+  } = useUndoRedo<Component[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -40,6 +51,35 @@ const Editor = () => {
       loadComponents();
     }
   }, [projectId, user]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Undo: Ctrl+Z or Cmd+Z
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (canUndo) undo();
+      }
+      // Redo: Ctrl+Shift+Z or Cmd+Shift+Z or Ctrl+Y
+      if (((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z') || (e.ctrlKey && e.key === 'y')) {
+        e.preventDefault();
+        if (canRedo) redo();
+      }
+      // Delete: Delete or Backspace
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedComponent) {
+        e.preventDefault();
+        handleDeleteComponent(selectedComponent);
+      }
+      // Save: Ctrl+S or Cmd+S
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canUndo, canRedo, selectedComponent, undo, redo]);
 
   const checkAccessAndLoadProject = async () => {
     try {
@@ -178,6 +218,53 @@ const Editor = () => {
     }
   };
 
+  const handleUpdateComponent = async (id: string, updates: Partial<Component>) => {
+    const component = components.find((c) => c.id === id);
+    if (!component) return;
+
+    const updatedComponent = { ...component, ...updates };
+
+    try {
+      const { error } = await supabase
+        .from("project_components")
+        .update(updates)
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setComponents(components.map((c) => (c.id === id ? updatedComponent : c)));
+    } catch (error) {
+      console.error("Error updating component:", error);
+      toast.error("Failed to update component");
+    }
+  };
+
+  const handleAIEnhance = async () => {
+    if (!selectedComponent) return;
+    
+    const component = components.find((c) => c.id === selectedComponent);
+    if (!component) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke("enhance-component", {
+        body: {
+          componentType: component.component_type,
+          currentProps: component.props,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.enhancedProps) {
+        handleUpdateComponent(selectedComponent, { props: data.enhancedProps });
+        toast.success("Component enhanced with AI!");
+      }
+    } catch (error) {
+      console.error("Error enhancing component:", error);
+      toast.error("Failed to enhance component");
+    }
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -224,15 +311,37 @@ const Editor = () => {
           <div className="glass border-b border-border">
             <div className="px-6 py-3 flex items-center justify-between">
               <h1 className="text-lg font-semibold">{projectName || "Untitled Project"}</h1>
-              <Button
-                size="sm"
-                onClick={handleSave}
-                disabled={isSaving}
-                className="bg-gradient-button border-0"
-              >
-                <Save className="mr-2 h-4 w-4" />
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
+              
+              <div className="flex items-center gap-2">
+                <KeyboardShortcutsHelp />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={undo}
+                  disabled={!canUndo}
+                  title="Undo (Ctrl+Z)"
+                >
+                  <Undo className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={redo}
+                  disabled={!canRedo}
+                  title="Redo (Ctrl+Shift+Z)"
+                >
+                  <Redo className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="bg-gradient-button border-0"
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {isSaving ? "Saving..." : "Save"}
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -245,6 +354,16 @@ const Editor = () => {
               onDeleteComponent={handleDeleteComponent}
             />
           </div>
+        </div>
+
+        {/* Right Sidebar - Properties Panel */}
+        <div className="w-80 bg-muted/30 border-l border-border overflow-auto">
+          <PropertiesPanel
+            component={components.find((c) => c.id === selectedComponent) || null}
+            onUpdate={(updates) => selectedComponent && handleUpdateComponent(selectedComponent, updates)}
+            onDelete={() => selectedComponent && handleDeleteComponent(selectedComponent)}
+            onAIGenerate={handleAIEnhance}
+          />
         </div>
       </div>
     </DndContext>

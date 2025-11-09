@@ -41,11 +41,13 @@ const CanvasComponent = ({ component, isSelected, onSelect }: CanvasComponentPro
   };
 
   const renderComponent = () => {
+    const props = component.props || {};
+    
     switch (component.component_type) {
       case "button-variants":
         return (
           <div className="flex flex-wrap gap-2">
-            <Button size="sm">Primary</Button>
+            <Button size="sm">{props.buttonText || "Primary"}</Button>
             <Button size="sm" variant="secondary">Secondary</Button>
             <Button size="sm" variant="outline">Outline</Button>
           </div>
@@ -54,16 +56,16 @@ const CanvasComponent = ({ component, isSelected, onSelect }: CanvasComponentPro
       case "glass-card":
         return (
           <Card className="glass glass-glow border-0 p-4">
-            <h3 className="font-semibold mb-2">Glass Card</h3>
-            <p className="text-sm text-muted-foreground">Beautiful glassmorphism effect</p>
+            <h3 className="font-semibold mb-2">{props.title || "Glass Card"}</h3>
+            <p className="text-sm text-muted-foreground">{props.description || "Beautiful glassmorphism effect"}</p>
           </Card>
         );
       
       case "input-field":
         return (
           <div className="space-y-2">
-            <Label>Email</Label>
-            <Input type="email" placeholder="you@example.com" />
+            <Label>{props.label || "Email"}</Label>
+            <Input type="email" placeholder={props.placeholder || "you@example.com"} />
           </div>
         );
       
@@ -95,8 +97,8 @@ const CanvasComponent = ({ component, isSelected, onSelect }: CanvasComponentPro
         e.stopPropagation();
         onSelect();
       }}
-      className={`cursor-move transition-all ${
-        isSelected ? "ring-2 ring-primary ring-offset-2" : ""
+      className={`cursor-move transition-all animate-fade-in ${
+        isSelected ? "ring-2 ring-primary ring-offset-2 shadow-lg" : "hover:shadow-md"
       }`}
     >
       {renderComponent()}
