@@ -4,13 +4,19 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Chrome } from "lucide-react";
+import Navigation from "@/components/Navigation";
+import InteractiveLighting from "@/components/InteractiveLighting";
 
 const Signup = () => {
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen relative flex items-center justify-center p-4">
+      <InteractiveLighting />
+      <Navigation />
+      <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Grant Development</h1>
+          <h1 className="text-3xl font-bold bg-gradient-aurora-magenta bg-clip-text text-transparent mb-2">
+            Grant Development™
+          </h1>
           <p className="text-muted-foreground">AI Website Builder</p>
         </div>
 

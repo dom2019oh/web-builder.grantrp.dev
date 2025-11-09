@@ -48,7 +48,7 @@ const plans = [
 
 const Pricing = () => {
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section id="pricing" className="py-24 relative overflow-hidden">
       {/* Aurora background */}
       <div className="absolute inset-0 bg-gradient-aurora-teal opacity-40 aurora-animate" style={{ backgroundSize: '200% 200%' }} />
       

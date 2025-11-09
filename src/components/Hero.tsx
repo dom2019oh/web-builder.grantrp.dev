@@ -21,7 +21,7 @@ const Hero = () => {
           {/* Glass morphism tag */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass glass-glow mb-8 hover:shadow-glow transition-all">
             <Sparkles className="h-4 w-4 text-aurora-cyan animate-pulse" />
-            <span className="text-sm font-medium">AI-Powered Website Builder</span>
+            <span className="text-sm font-medium">Grant Development™ - AI Website Builder</span>
           </div>
           
           {/* Hero title with gradient text */}
@@ -48,7 +48,7 @@ const Hero = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/templates">
+            <a href="#templates">
               <Button 
                 size="lg" 
                 variant="outline" 
@@ -56,7 +56,7 @@ const Hero = () => {
               >
                 View Templates
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </div>
