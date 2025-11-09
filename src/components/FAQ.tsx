@@ -35,17 +35,19 @@ const faqs = [
 const FAQ = () => {
   return (
     <section className="py-24 relative overflow-hidden">
-      {/* Aurora background effects */}
-      <div className="absolute inset-0 bg-gradient-aurora-teal opacity-10 aurora-animate" style={{ backgroundSize: '200% 200%' }} />
-      <div className="absolute top-20 right-20 w-96 h-96 bg-aurora-cyan/10 rounded-full blur-[120px]" />
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-aurora-magenta/10 rounded-full blur-[120px]" />
+      {/* Aurora background effects - ENHANCED */}
+      <div className="absolute inset-0 bg-gradient-aurora-teal opacity-15 aurora-animate" style={{ backgroundSize: '200% 200%' }} />
+      <div className="absolute inset-0 bg-gradient-aurora-magenta opacity-10 aurora-animate" style={{ backgroundSize: '200% 200%', animationDirection: 'reverse', animationDuration: '25s' }} />
+      <div className="absolute top-20 right-20 w-[450px] h-[450px] bg-aurora-cyan/15 rounded-full blur-[140px] animate-pulse" />
+      <div className="absolute bottom-20 left-20 w-[450px] h-[450px] bg-aurora-magenta/15 rounded-full blur-[140px] animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-1/2 left-1/3 w-[350px] h-[350px] bg-aurora-violet/10 rounded-full blur-[130px] animate-pulse" style={{ animationDelay: '2s' }} />
       
       <div className="container mx-auto px-6 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-aurora-magenta bg-clip-text text-transparent">
+        <div className="text-center mb-16 animate-fade-in">
+          <h2 className="text-4xl font-bold mb-4 bg-gradient-button bg-clip-text text-transparent drop-shadow-glow" style={{ backgroundSize: '200% 200%' }}>
             Frequently Asked Questions
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-xl text-foreground/80">
             Everything you need to know about Grant Development™
           </p>
         </div>
@@ -56,12 +58,13 @@ const FAQ = () => {
               <AccordionItem 
                 key={index} 
                 value={`item-${index}`}
-                className="glass glass-glow rounded-lg px-6 border-0"
+                className="glass glass-glow rounded-xl px-6 border border-aurora-cyan/10 hover:border-aurora-magenta/30 transition-all duration-300 hover:shadow-glow-magenta backdrop-blur-xl animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <AccordionTrigger className="text-foreground hover:text-primary hover:no-underline">
+                <AccordionTrigger className="text-foreground hover:text-aurora-cyan hover:no-underline transition-colors duration-300">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
+                <AccordionContent className="text-foreground/80">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
