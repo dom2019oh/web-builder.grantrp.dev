@@ -48,11 +48,14 @@ const plans = [
 
 const Pricing = () => {
   return (
-    <section className="py-24 bg-gradient-hero relative">
-      <div className="container mx-auto px-4">
+    <section className="py-24 relative overflow-hidden">
+      {/* Aurora background */}
+      <div className="absolute inset-0 bg-gradient-aurora-teal opacity-40 aurora-animate" style={{ backgroundSize: '200% 200%' }} />
+      
+      <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-xl text-foreground/70">
             Choose the plan that fits your needs
           </p>
         </div>
@@ -61,29 +64,29 @@ const Pricing = () => {
           {plans.map((plan, index) => (
             <Card 
               key={index} 
-              className={`border-border bg-gradient-card shadow-card hover:shadow-glow transition-all duration-300 relative ${
-                plan.popular ? 'ring-2 ring-primary' : ''
+              className={`glass glass-glow hover:shadow-glow-magenta transition-all duration-300 relative border-0 ${
+                plan.popular ? 'ring-2 ring-aurora-cyan shadow-glow' : ''
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-primary rounded-full text-sm font-semibold">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-button rounded-full text-sm font-semibold shadow-glow">
                   Most Popular
                 </div>
               )}
               <CardHeader>
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
+                <CardTitle className="text-2xl text-foreground">{plan.name}</CardTitle>
+                <CardDescription className="text-foreground/70">{plan.description}</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground">/month</span>
+                  <span className="text-4xl font-bold bg-gradient-aurora-teal bg-clip-text text-transparent">{plan.price}</span>
+                  <span className="text-foreground/60">/month</span>
                 </div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-center gap-2">
-                      <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
+                      <Check className="h-5 w-5 text-aurora-cyan flex-shrink-0" />
+                      <span className="text-sm text-foreground/80">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -93,9 +96,9 @@ const Pricing = () => {
                   <Button 
                     className={`w-full ${
                       plan.popular 
-                        ? 'bg-gradient-primary hover:opacity-90' 
-                        : ''
-                    }`}
+                        ? 'bg-gradient-button border-0 shadow-glow hover:shadow-glow-magenta' 
+                        : 'glass hover:bg-gradient-button hover:border-0'
+                    } transition-all hover:scale-105`}
                     variant={plan.popular ? 'default' : 'outline'}
                   >
                     Get Started

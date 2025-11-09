@@ -47,15 +47,33 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        aurora: {
+          magenta: "hsl(var(--aurora-magenta))",
+          cyan: "hsl(var(--aurora-cyan))",
+          teal: "hsl(var(--aurora-teal))",
+          blue: "hsl(var(--aurora-blue))",
+          violet: "hsl(var(--aurora-violet))",
+          dark: "hsl(var(--aurora-dark))",
+        },
       },
       backgroundImage: {
-        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-aurora-magenta': 'var(--gradient-aurora-magenta-cyan)',
+        'gradient-aurora-teal': 'var(--gradient-aurora-teal-blue)',
         'gradient-hero': 'var(--gradient-hero)',
         'gradient-card': 'var(--gradient-card)',
+        'gradient-button': 'var(--gradient-button)',
       },
       boxShadow: {
         'glow': 'var(--shadow-glow)',
+        'glow-magenta': 'var(--shadow-glow-magenta)',
         'card': 'var(--shadow-card)',
+        'glass': 'var(--glass-shadow)',
+      },
+      backdropBlur: {
+        'glass': '25px',
+      },
+      backdropSaturate: {
+        'glass': '180%',
       },
       transitionProperty: {
         'smooth': 'var(--transition-smooth)',
