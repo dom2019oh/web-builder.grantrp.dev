@@ -138,7 +138,7 @@ const Dashboard = () => {
                   variant="outline"
                   size="sm"
                   className="flex-1 glass"
-                  onClick={() => navigate(`/editor/${project.id}`)}
+                  onClick={() => navigate(`/projects/${project.id}`)}
                 >
                   Open Editor
                 </Button>
