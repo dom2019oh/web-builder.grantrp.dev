@@ -26,16 +26,21 @@ const Editor = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !projectId) {
+      return;
+    }
+    loadProject();
+  }, [projectId, user]);
+
+  const loadProject = async () => {
+    if (!user || !projectId) {
+      console.log("Editor: No user or projectId", { user: !!user, projectId });
       navigate("/login");
       return;
     }
-    if (projectId) {
-      loadProject();
-    }
-  }, [projectId, user, navigate]);
 
-  const loadProject = async () => {
+    console.log("Editor: Loading project", projectId);
+    
     try {
       const { data: project, error: projectError } = await supabase
         .from("projects")
@@ -43,13 +48,17 @@ const Editor = () => {
         .eq("id", projectId)
         .single();
 
+      console.log("Editor: Project fetch result", { project: !!project, error: projectError });
+
       if (projectError || !project) {
+        console.error("Editor: Project not found", projectError);
         toast.error("Project not found");
         navigate("/dashboard");
         return;
       }
 
-      if (project.user_id !== user!.id) {
+      if (project.user_id !== user.id) {
+        console.error("Editor: Access denied", { projectUserId: project.user_id, userId: user.id });
         toast.error("Access denied");
         navigate("/dashboard");
         return;
@@ -62,10 +71,12 @@ const Editor = () => {
         .select("*")
         .eq("project_id", projectId);
 
+      console.log("Editor: Components loaded", componentsData?.length || 0);
       setComponents(componentsData || []);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Editor: Error loading project", error);
       toast.error("Failed to load project");
+      navigate("/dashboard");
     } finally {
       setLoading(false);
     }
