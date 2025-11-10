@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Undo, Redo } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import ComponentPalette from "@/components/editor/ComponentPalette";
+import SectionPalette from "@/components/editor/SectionPalette";
 import EditorCanvas from "@/components/editor/EditorCanvas";
-import PropertiesPanel from "@/components/editor/PropertiesPanel";
+import StylePanel from "@/components/editor/StylePanel";
+import EditorToolbar from "@/components/editor/EditorToolbar";
 import KeyboardShortcutsHelp from "@/components/editor/KeyboardShortcutsHelp";
 import { useUndoRedo } from "@/hooks/useUndoRedo";
 
@@ -31,6 +32,8 @@ const Editor = () => {
   const [projectName, setProjectName] = useState("");
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [viewMode, setViewMode] = useState<"desktop" | "tablet" | "mobile">("desktop");
+  const [previewMode, setPreviewMode] = useState(false);
   
   const {
     state: components,
@@ -277,84 +280,115 @@ const Editor = () => {
     }
   };
 
+  const getCanvasWidth = () => {
+    switch (viewMode) {
+      case "mobile":
+        return "375px";
+      case "tablet":
+        return "768px";
+      default:
+        return "100%";
+    }
+  };
+
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="min-h-screen flex bg-background">
-        {/* Left Sidebar - Component Palette */}
-        <div className="w-80 bg-muted/30 border-r border-border overflow-auto">
-          <div className="p-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/dashboard")}
-              className="mb-4 w-full justify-start"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
-            </Button>
-            <ComponentPalette />
-          </div>
-        </div>
+      <div className="min-h-screen flex flex-col bg-background">
+        {/* Top Toolbar */}
+        <EditorToolbar
+          projectName={projectName}
+          onSave={handleSave}
+          onUndo={undo}
+          onRedo={redo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          isSaving={isSaving}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          previewMode={previewMode}
+          onPreviewToggle={() => setPreviewMode(!previewMode)}
+        />
 
-        {/* Main Canvas Area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Top Header */}
-          <div className="glass border-b border-border">
-            <div className="px-6 py-3 flex items-center justify-between">
-              <h1 className="text-lg font-semibold">{projectName || "Untitled Project"}</h1>
-              
-              <div className="flex items-center gap-2">
-                <KeyboardShortcutsHelp />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={undo}
-                  disabled={!canUndo}
-                  title="Undo (Ctrl+Z)"
-                >
-                  <Undo className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={redo}
-                  disabled={!canRedo}
-                  title="Redo (Ctrl+Shift+Z)"
-                >
-                  <Redo className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="bg-gradient-button border-0"
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  {isSaving ? "Saving..." : "Save"}
-                </Button>
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left Sidebar - Section Palette */}
+          {!previewMode && (
+            <div className="w-72 bg-muted/30 border-r border-border overflow-hidden">
+              <SectionPalette />
+            </div>
+          )}
+
+          {/* Main Canvas Area */}
+          <div className="flex-1 flex flex-col overflow-hidden bg-muted/20">
+            <div className="flex-1 overflow-auto p-6">
+              <div
+                className="mx-auto transition-all duration-300 bg-background shadow-xl"
+                style={{
+                  width: getCanvasWidth(),
+                  minHeight: viewMode === "desktop" ? "100%" : "667px",
+                }}
+              >
+                <EditorCanvas
+                  components={components}
+                  selectedComponent={selectedComponent}
+                  onSelectComponent={setSelectedComponent}
+                  onDeleteComponent={handleDeleteComponent}
+                />
               </div>
             </div>
           </div>
 
-          {/* Canvas */}
-          <div className="flex-1 overflow-auto">
-            <EditorCanvas
-              components={components}
-              selectedComponent={selectedComponent}
-              onSelectComponent={setSelectedComponent}
-              onDeleteComponent={handleDeleteComponent}
-            />
-          </div>
+          {/* Right Sidebar - Style Panel */}
+          {!previewMode && (
+            <div className="w-80 bg-muted/30 border-l border-border overflow-hidden">
+              <StylePanel
+                component={components.find((c) => c.id === selectedComponent) || null}
+                onUpdate={(updates) => selectedComponent && handleUpdateComponent(selectedComponent, updates)}
+                onDelete={() => selectedComponent && handleDeleteComponent(selectedComponent)}
+                onAIGenerate={handleAIEnhance}
+                onDuplicate={() => {
+                  const component = components.find((c) => c.id === selectedComponent);
+                  if (component) {
+                    const { id, created_at, updated_at, ...componentData } = component as any;
+                    const newComponent = {
+                      project_id: projectId,
+                      ...componentData,
+                      position_x: component.position_x + 20,
+                      position_y: component.position_y + 20,
+                    };
+                    supabase
+                      .from("project_components")
+                      .insert([newComponent])
+                      .select()
+                      .single()
+                      .then(({ data, error }) => {
+                        if (!error && data) {
+                          setComponents([...components, data]);
+                          toast.success("Component duplicated!");
+                        }
+                      });
+                  }
+                }}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Right Sidebar - Properties Panel */}
-        <div className="w-80 bg-muted/30 border-l border-border overflow-auto">
-          <PropertiesPanel
-            component={components.find((c) => c.id === selectedComponent) || null}
-            onUpdate={(updates) => selectedComponent && handleUpdateComponent(selectedComponent, updates)}
-            onDelete={() => selectedComponent && handleDeleteComponent(selectedComponent)}
-            onAIGenerate={handleAIEnhance}
-          />
+        {/* Floating Back Button */}
+        <div className="absolute top-4 left-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/dashboard")}
+            className="glass shadow-lg"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Dashboard
+          </Button>
+        </div>
+
+        {/* Keyboard Shortcuts Help */}
+        <div className="absolute bottom-4 right-4">
+          <KeyboardShortcutsHelp />
         </div>
       </div>
     </DndContext>
