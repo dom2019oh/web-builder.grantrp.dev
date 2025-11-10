@@ -99,7 +99,8 @@ const Editor = () => {
     };
 
     loadProjectData();
-  }, [projectId, user, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, user]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -128,7 +129,8 @@ const Editor = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [canUndo, canRedo, selectedComponent, undo, redo]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canUndo, canRedo, selectedComponent]);
 
 
   const handleDragStart = (event: DragStartEvent) => {
