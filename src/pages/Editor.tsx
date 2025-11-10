@@ -45,15 +45,61 @@ const Editor = () => {
   } = useUndoRedo<Component[]>([]);
 
   useEffect(() => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    if (projectId) {
-      checkAccessAndLoadProject();
-      loadComponents();
-    }
-  }, [projectId, user]);
+    const loadProjectData = async () => {
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+      
+      if (!projectId) {
+        navigate("/dashboard");
+        return;
+      }
+
+      try {
+        // Load project and verify access
+        const { data: project, error: projectError } = await supabase
+          .from("projects")
+          .select("*")
+          .eq("id", projectId)
+          .single();
+
+        if (projectError || !project) {
+          toast.error("Project not found");
+          navigate("/dashboard");
+          return;
+        }
+
+        if (project.user_id !== user.id) {
+          toast.error("You don't have permission to access this project");
+          navigate("/dashboard");
+          return;
+        }
+
+        setProjectName(project.name);
+
+        // Load components
+        const { data: componentsData, error: componentsError } = await supabase
+          .from("project_components")
+          .select("*")
+          .eq("project_id", projectId)
+          .order("z_index");
+
+        if (componentsError) {
+          console.error("Error loading components:", componentsError);
+          toast.error("Failed to load components");
+        } else {
+          setComponents(componentsData || []);
+        }
+      } catch (error) {
+        console.error("Error loading project:", error);
+        toast.error("Failed to load project");
+        navigate("/dashboard");
+      }
+    };
+
+    loadProjectData();
+  }, [projectId, user, navigate]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -84,46 +130,6 @@ const Editor = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [canUndo, canRedo, selectedComponent, undo, redo]);
 
-  const checkAccessAndLoadProject = async () => {
-    try {
-      const { data: project, error: projectError } = await supabase
-        .from("projects")
-        .select("*")
-        .eq("id", projectId)
-        .single();
-
-      if (projectError) throw projectError;
-
-      // Access control: only project owner can access
-      if (project.user_id !== user!.id) {
-        toast.error("You don't have permission to access this project");
-        navigate("/dashboard");
-        return;
-      }
-
-      setProjectName(project.name);
-    } catch (error) {
-      console.error("Error loading project:", error);
-      toast.error("Failed to load project");
-      navigate("/dashboard");
-    }
-  };
-
-  const loadComponents = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("project_components")
-        .select("*")
-        .eq("project_id", projectId)
-        .order("z_index");
-
-      if (error) throw error;
-      setComponents(data || []);
-    } catch (error) {
-      console.error("Error loading components:", error);
-      toast.error("Failed to load components");
-    }
-  };
 
   const handleDragStart = (event: DragStartEvent) => {
     if (event.active.id !== "canvas") {
