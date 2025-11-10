@@ -42,7 +42,7 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/projects/:projectId" element={<Editor />} />
+      <Route path="/editor/:projectId" element={<Editor />} />
       <Route path="/templates" element={<TemplateGallery />} />
       <Route path="/settings" element={<ProjectSettings />} />
       <Route path="/components" element={<ComponentLibrary />} />
