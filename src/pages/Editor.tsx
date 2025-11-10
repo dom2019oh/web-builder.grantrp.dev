@@ -1,28 +1,19 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import SectionPalette from "@/components/editor/SectionPalette";
-import EditorCanvas from "@/components/editor/EditorCanvas";
-import StylePanel from "@/components/editor/StylePanel";
-import EditorToolbar from "@/components/editor/EditorToolbar";
-import KeyboardShortcutsHelp from "@/components/editor/KeyboardShortcutsHelp";
-import { useUndoRedo } from "@/hooks/useUndoRedo";
 
 interface Component {
   id: string;
-  component_id: string;
   component_type: string;
   props: any;
-  position_x: number;
-  position_y: number;
-  width: number;
-  height: number;
-  z_index: number;
 }
 
 const Editor = () => {
@@ -30,175 +21,82 @@ const Editor = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [projectName, setProjectName] = useState("");
-  const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [viewMode, setViewMode] = useState<"desktop" | "tablet" | "mobile">("desktop");
-  const [previewMode, setPreviewMode] = useState(false);
-  
-  const {
-    state: components,
-    setState: setComponents,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-  } = useUndoRedo<Component[]>([]);
+  const [components, setComponents] = useState<Component[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadProjectData = async () => {
-      if (!user) {
-        navigate("/login");
-        return;
-      }
-      
-      if (!projectId) {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    if (projectId) {
+      loadProject();
+    }
+  }, [projectId, user, navigate]);
+
+  const loadProject = async () => {
+    try {
+      const { data: project, error: projectError } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", projectId)
+        .single();
+
+      if (projectError || !project) {
+        toast.error("Project not found");
         navigate("/dashboard");
         return;
       }
 
-      try {
-        // Load project and verify access
-        const { data: project, error: projectError } = await supabase
-          .from("projects")
-          .select("*")
-          .eq("id", projectId)
-          .single();
-
-        if (projectError || !project) {
-          toast.error("Project not found");
-          navigate("/dashboard");
-          return;
-        }
-
-        if (project.user_id !== user.id) {
-          toast.error("You don't have permission to access this project");
-          navigate("/dashboard");
-          return;
-        }
-
-        setProjectName(project.name);
-
-        // Load components
-        const { data: componentsData, error: componentsError } = await supabase
-          .from("project_components")
-          .select("*")
-          .eq("project_id", projectId)
-          .order("z_index");
-
-        if (componentsError) {
-          console.error("Error loading components:", componentsError);
-          toast.error("Failed to load components");
-        } else {
-          setComponents(componentsData || []);
-        }
-      } catch (error) {
-        console.error("Error loading project:", error);
-        toast.error("Failed to load project");
+      if (project.user_id !== user!.id) {
+        toast.error("Access denied");
         navigate("/dashboard");
+        return;
       }
-    };
 
-    loadProjectData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId, user]);
+      setProjectName(project.name);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Undo: Ctrl+Z or Cmd+Z
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        if (canUndo) undo();
-      }
-      // Redo: Ctrl+Shift+Z or Cmd+Shift+Z or Ctrl+Y
-      if (((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z') || (e.ctrlKey && e.key === 'y')) {
-        e.preventDefault();
-        if (canRedo) redo();
-      }
-      // Delete: Delete or Backspace
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedComponent) {
-        e.preventDefault();
-        handleDeleteComponent(selectedComponent);
-      }
-      // Save: Ctrl+S or Cmd+S
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        handleSave();
-      }
-    };
+      const { data: componentsData } = await supabase
+        .from("project_components")
+        .select("*")
+        .eq("project_id", projectId);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canUndo, canRedo, selectedComponent]);
-
-
-  const handleDragStart = (event: DragStartEvent) => {
-    if (event.active.id !== "canvas") {
-      setSelectedComponent(event.active.id as string);
+      setComponents(componentsData || []);
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to load project");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, delta, over } = event;
-
-    if (over?.id === "canvas" && active.data.current?.isNew) {
-      // Create new component
+  const handleAddComponent = async () => {
+    try {
       const newComponent = {
         project_id: projectId,
-        component_type: active.id as string,
-        component_id: active.id as string,
-        props: {},
-        position_x: Math.max(0, delta.x),
-        position_y: Math.max(0, delta.y),
+        component_type: "text",
+        component_id: `component-${Date.now()}`,
+        props: { content: "New component" },
+        position_x: 0,
+        position_y: 0,
         width: 300,
-        height: 200,
+        height: 100,
         z_index: components.length,
       };
 
-      try {
-        const { data, error } = await supabase
-          .from("project_components")
-          .insert(newComponent)
-          .select()
-          .single();
+      const { data, error } = await supabase
+        .from("project_components")
+        .insert(newComponent)
+        .select()
+        .single();
 
-        if (error) throw error;
-        setComponents([...components, data]);
-        toast.success("Component added!");
-      } catch (error) {
-        console.error("Error adding component:", error);
-        toast.error("Failed to add component");
-      }
-    } else if (active.data.current?.isExisting) {
-      // Update existing component position
-      const component = components.find((c) => c.id === active.id);
-      if (component) {
-        const updatedComponent = {
-          ...component,
-          position_x: component.position_x + delta.x,
-          position_y: component.position_y + delta.y,
-        };
-
-        try {
-          const { error } = await supabase
-            .from("project_components")
-            .update({
-              position_x: updatedComponent.position_x,
-              position_y: updatedComponent.position_y,
-            })
-            .eq("id", component.id);
-
-          if (error) throw error;
-
-          setComponents(
-            components.map((c) => (c.id === component.id ? updatedComponent : c))
-          );
-        } catch (error) {
-          console.error("Error updating component:", error);
-          toast.error("Failed to update component");
-        }
-      }
+      if (error) throw error;
+      setComponents([...components, data]);
+      toast.success("Component added");
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to add component");
     }
   };
 
@@ -210,196 +108,184 @@ const Editor = () => {
         .eq("id", id);
 
       if (error) throw error;
-
       setComponents(components.filter((c) => c.id !== id));
-      setSelectedComponent(null);
-      toast.success("Component deleted!");
+      setSelectedId(null);
+      toast.success("Component deleted");
     } catch (error) {
-      console.error("Error deleting component:", error);
+      console.error("Error:", error);
       toast.error("Failed to delete component");
     }
   };
 
-  const handleUpdateComponent = async (id: string, updates: Partial<Component>) => {
-    const component = components.find((c) => c.id === id);
-    if (!component) return;
-
-    const updatedComponent = { ...component, ...updates };
-
+  const handleUpdateComponent = async (id: string, props: any) => {
     try {
       const { error } = await supabase
         .from("project_components")
-        .update(updates)
+        .update({ props })
         .eq("id", id);
 
       if (error) throw error;
-
-      setComponents(components.map((c) => (c.id === id ? updatedComponent : c)));
+      setComponents(components.map((c) => (c.id === id ? { ...c, props } : c)));
     } catch (error) {
-      console.error("Error updating component:", error);
-      toast.error("Failed to update component");
-    }
-  };
-
-  const handleAIEnhance = async () => {
-    if (!selectedComponent) return;
-    
-    const component = components.find((c) => c.id === selectedComponent);
-    if (!component) return;
-
-    try {
-      const { data, error } = await supabase.functions.invoke("enhance-component", {
-        body: {
-          componentType: component.component_type,
-          currentProps: component.props,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.enhancedProps) {
-        handleUpdateComponent(selectedComponent, { props: data.enhancedProps });
-        toast.success("Component enhanced with AI!");
-      }
-    } catch (error) {
-      console.error("Error enhancing component:", error);
-      toast.error("Failed to enhance component");
+      console.error("Error:", error);
+      toast.error("Failed to update");
     }
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
     try {
       const { error } = await supabase
         .from("projects")
-        .update({ 
-          updated_at: new Date().toISOString() 
-        })
+        .update({ updated_at: new Date().toISOString() })
         .eq("id", projectId);
 
       if (error) throw error;
-
-      toast.success("Project saved!");
+      toast.success("Project saved");
     } catch (error) {
-      console.error("Error saving project:", error);
-      toast.error("Failed to save project");
-    } finally {
-      setIsSaving(false);
+      console.error("Error:", error);
+      toast.error("Failed to save");
     }
   };
 
-  const getCanvasWidth = () => {
-    switch (viewMode) {
-      case "mobile":
-        return "375px";
-      case "tablet":
-        return "768px";
-      default:
-        return "100%";
-    }
-  };
+  const selectedComponent = components.find((c) => c.id === selectedId);
+
+  if (loading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="min-h-screen flex flex-col bg-background">
-        {/* Top Toolbar */}
-        <EditorToolbar
-          projectName={projectName}
-          onSave={handleSave}
-          onUndo={undo}
-          onRedo={redo}
-          canUndo={canUndo}
-          canRedo={canRedo}
-          isSaving={isSaving}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          previewMode={previewMode}
-          onPreviewToggle={() => setPreviewMode(!previewMode)}
-        />
-
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left Sidebar - Section Palette */}
-          {!previewMode && (
-            <div className="w-72 bg-muted/30 border-r border-border overflow-hidden">
-              <SectionPalette />
-            </div>
-          )}
-
-          {/* Main Canvas Area */}
-          <div className="flex-1 flex flex-col overflow-hidden bg-muted/20">
-            <div className="flex-1 overflow-auto p-6">
-              <div
-                className="mx-auto transition-all duration-300 bg-background shadow-xl"
-                style={{
-                  width: getCanvasWidth(),
-                  minHeight: viewMode === "desktop" ? "100%" : "667px",
-                }}
-              >
-                <EditorCanvas
-                  components={components}
-                  selectedComponent={selectedComponent}
-                  onSelectComponent={setSelectedComponent}
-                  onDeleteComponent={handleDeleteComponent}
-                />
-              </div>
-            </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-muted/30 px-4 py-3">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+            <h1 className="text-xl font-semibold">{projectName}</h1>
           </div>
-
-          {/* Right Sidebar - Style Panel */}
-          {!previewMode && (
-            <div className="w-80 bg-muted/30 border-l border-border overflow-hidden">
-              <StylePanel
-                component={components.find((c) => c.id === selectedComponent) || null}
-                onUpdate={(updates) => selectedComponent && handleUpdateComponent(selectedComponent, updates)}
-                onDelete={() => selectedComponent && handleDeleteComponent(selectedComponent)}
-                onAIGenerate={handleAIEnhance}
-                onDuplicate={() => {
-                  const component = components.find((c) => c.id === selectedComponent);
-                  if (component) {
-                    const { id, created_at, updated_at, ...componentData } = component as any;
-                    const newComponent = {
-                      project_id: projectId,
-                      ...componentData,
-                      position_x: component.position_x + 20,
-                      position_y: component.position_y + 20,
-                    };
-                    supabase
-                      .from("project_components")
-                      .insert([newComponent])
-                      .select()
-                      .single()
-                      .then(({ data, error }) => {
-                        if (!error && data) {
-                          setComponents([...components, data]);
-                          toast.success("Component duplicated!");
-                        }
-                      });
-                  }
-                }}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Floating Back Button */}
-        <div className="absolute top-4 left-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate("/dashboard")}
-            className="glass shadow-lg"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Dashboard
+          <Button onClick={handleSave} size="sm">
+            <Save className="h-4 w-4 mr-2" />
+            Save
           </Button>
         </div>
+      </header>
 
-        {/* Keyboard Shortcuts Help */}
-        <div className="absolute bottom-4 right-4">
-          <KeyboardShortcutsHelp />
-        </div>
+      <div className="grid grid-cols-3 gap-4 p-4 max-w-7xl mx-auto">
+        {/* Components List */}
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle className="text-lg">Components</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Button onClick={handleAddComponent} className="w-full" size="sm">
+              Add Component
+            </Button>
+            <div className="space-y-1">
+              {components.map((component) => (
+                <div
+                  key={component.id}
+                  className={`p-2 rounded border cursor-pointer hover:bg-muted transition-colors ${
+                    selectedId === component.id ? "bg-muted border-primary" : ""
+                  }`}
+                  onClick={() => setSelectedId(component.id)}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm truncate">{component.component_type}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteComponent(component.id);
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {components.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No components yet
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Canvas Preview */}
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle className="text-lg">Preview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="border rounded-lg p-4 min-h-[400px] bg-muted/20">
+              {components.map((component) => (
+                <div
+                  key={component.id}
+                  className={`mb-2 p-3 rounded bg-background border ${
+                    selectedId === component.id ? "border-primary" : ""
+                  }`}
+                  onClick={() => setSelectedId(component.id)}
+                >
+                  {component.props?.content || "Empty component"}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Properties Panel */}
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle className="text-lg">Properties</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {selectedComponent ? (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="type">Type</Label>
+                  <Input
+                    id="type"
+                    value={selectedComponent.component_type}
+                    disabled
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="content">Content</Label>
+                  <Textarea
+                    id="content"
+                    value={selectedComponent.props?.content || ""}
+                    onChange={(e) =>
+                      handleUpdateComponent(selectedComponent.id, {
+                        ...selectedComponent.props,
+                        content: e.target.value,
+                      })
+                    }
+                    className="mt-1"
+                    rows={5}
+                  />
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeleteComponent(selectedComponent.id)}
+                  className="w-full"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Component
+                </Button>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Select a component to edit
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
-    </DndContext>
+    </div>
   );
 };
 
