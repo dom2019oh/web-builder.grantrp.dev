@@ -21,6 +21,7 @@ import TermsOfUse from "./pages/TermsOfUse";
 import RefundsCancellations from "./pages/RefundsCancellations";
 import Cookies from "./pages/Cookies";
 import IntellectualProperty from "./pages/IntellectualProperty";
+import Billing from "./pages/Billing";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const AppRoutes = () => {
       <Route path="/editor/:projectId" element={<Editor />} />
       <Route path="/templates" element={<TemplateGallery />} />
       <Route path="/settings" element={<ProjectSettings />} />
+      <Route path="/billing" element={<Billing />} />
       <Route path="/components" element={<ComponentLibrary />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />

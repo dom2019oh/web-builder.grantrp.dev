@@ -28,9 +28,40 @@ serve(async (req) => {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.user_id;
+        const sessionType = session.metadata?.type;
 
         if (!userId) {
           console.error('No user_id in session metadata');
+          break;
+        }
+
+        // Handle credit purchases
+        if (sessionType === 'credits') {
+          const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+          const priceId = lineItems.data[0]?.price?.id;
+
+          // Map price ID to credit amount
+          const creditMap: Record<string, number> = {
+            'price_1SSjmBLW3HLLN5bg8qdKaskZ': 300,  // Starter
+            'price_1SSjmCLW3HLLN5bgOKbMaMeT': 750,  // Pro
+            'price_1SSjmDLW3HLLN5bg1cDg9NBB': 2000, // Business
+            'price_1SSjmELW3HLLN5bgDbDjpAjz': 5000, // Enterprise
+          };
+
+          const creditsToAdd = priceId ? creditMap[priceId] : 0;
+
+          if (creditsToAdd > 0) {
+            await supabase.rpc('add_credits', {
+              _user_id: userId,
+              _action: 'Credit Purchase',
+              _credits_to_add: creditsToAdd,
+              _metadata: {
+                session_id: session.id,
+                price_id: priceId,
+                amount_paid: session.amount_total,
+              },
+            });
+          }
           break;
         }
 
@@ -104,7 +135,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Webhook error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       {
         status: 400,
         headers: { 'Content-Type': 'application/json' },

@@ -16,7 +16,7 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
-    const { priceId } = await req.json();
+    const { priceId, type } = await req.json();
     
     // Get user from auth header
     const authHeader = req.headers.get('Authorization');
@@ -75,6 +75,14 @@ serve(async (req) => {
     }
 
     // Create checkout session
+    const sessionMetadata: any = {
+      user_id: user.id,
+    };
+
+    if (type === 'credits') {
+      sessionMetadata.type = 'credits';
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
@@ -83,12 +91,10 @@ serve(async (req) => {
           quantity: 1,
         },
       ],
-      mode: priceId.includes('one_time') ? 'payment' : 'subscription',
-      success_url: `${req.headers.get('origin')}/dashboard?success=true`,
-      cancel_url: `${req.headers.get('origin')}/dashboard?canceled=true`,
-      metadata: {
-        user_id: user.id,
-      },
+      mode: 'payment',
+      success_url: `${req.headers.get('origin')}/billing?success=true`,
+      cancel_url: `${req.headers.get('origin')}/billing?canceled=true`,
+      metadata: sessionMetadata,
     });
 
     return new Response(
@@ -101,7 +107,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,

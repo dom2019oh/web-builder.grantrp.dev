@@ -14,26 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      credit_log: {
+        Row: {
+          action: string
+          credits_after: number
+          credits_used: number
+          id: string
+          metadata: Json | null
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          credits_after: number
+          credits_used: number
+          id?: string
+          metadata?: Json | null
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          credits_after?: number
+          credits_used?: number
+          id?: string
+          metadata?: Json | null
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          auto_refill_amount: number | null
+          auto_refill_enabled: boolean | null
+          auto_refill_threshold: number | null
           avatar_url: string | null
           created_at: string
+          credits: number
           email: string
           full_name: string | null
           id: string
           updated_at: string
         }
         Insert: {
+          auto_refill_amount?: number | null
+          auto_refill_enabled?: boolean | null
+          auto_refill_threshold?: number | null
           avatar_url?: string | null
           created_at?: string
+          credits?: number
           email: string
           full_name?: string | null
           id: string
           updated_at?: string
         }
         Update: {
+          auto_refill_amount?: number | null
+          auto_refill_enabled?: boolean | null
+          auto_refill_threshold?: number | null
           avatar_url?: string | null
           created_at?: string
+          credits?: number
           email?: string
           full_name?: string | null
           id?: string
@@ -246,7 +288,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_credits: {
+        Args: {
+          _action: string
+          _credits_to_add: number
+          _metadata?: Json
+          _user_id: string
+        }
+        Returns: boolean
+      }
       can_user_publish: { Args: { _user_id: string }; Returns: boolean }
+      deduct_credits: {
+        Args: {
+          _action: string
+          _credits_to_deduct: number
+          _metadata?: Json
+          _user_id: string
+        }
+        Returns: boolean
+      }
       get_max_websites: { Args: { _user_id: string }; Returns: number }
       get_user_plan: {
         Args: { _user_id: string }

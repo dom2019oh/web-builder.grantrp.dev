@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Settings, Trash2 } from "lucide-react";
+import { Plus, Settings, Trash2, Coins } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useCredits } from "@/hooks/useCredits";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { assignSubdomainToProject } from "@/lib/subdomainUtils";
@@ -12,6 +12,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import InteractiveLighting from "@/components/InteractiveLighting";
 import { Badge } from "@/components/ui/badge";
+import { CreditDisplay } from "@/components/CreditDisplay";
 
 interface Project {
   id: string;
@@ -24,9 +25,10 @@ interface Project {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
-  const { subscription, getPlanName, getMaxWebsites } = useSubscription();
+  const { credits } = useCredits();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
+  const maxProjects = 10; // Free tier allows up to 10 projects
 
   useEffect(() => {
     if (!loading && !user) {
@@ -66,7 +68,6 @@ const Dashboard = () => {
   };
 
   const canCreateMoreProjects = () => {
-    const maxProjects = getMaxWebsites();
     return projects.length < maxProjects;
   };
 
@@ -109,13 +110,19 @@ const Dashboard = () => {
           <div>
             <h2 className="text-3xl font-bold mb-2">Your Projects</h2>
             <p className="text-foreground/70">
-              Create and manage your websites • {projects.length} / {getMaxWebsites()} projects
+              Create and manage your websites • {projects.length} / {maxProjects} projects
             </p>
           </div>
           <div className="flex gap-3 items-center">
-            <Badge variant="outline" className="glass">
-              {getPlanName()} Plan
-            </Badge>
+            <CreditDisplay />
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/billing')}
+              className="glass"
+            >
+              <Coins className="h-4 w-4 mr-2" />
+              Billing
+            </Button>
             <Button 
               variant="outline" 
               onClick={handleSignOut}
@@ -135,7 +142,7 @@ const Dashboard = () => {
               if (canCreateMoreProjects()) {
                 navigate("/templates");
               } else {
-                toast.error(`You've reached your plan limit of ${getMaxWebsites()} project${getMaxWebsites() > 1 ? 's' : ''}. Upgrade to create more!`);
+                toast.error(`You've reached the maximum of ${maxProjects} projects.`);
               }
             }}
           >
@@ -147,7 +154,7 @@ const Dashboard = () => {
               <CardDescription className="text-foreground/70">
                 {canCreateMoreProjects() 
                   ? "Start with a template or from scratch" 
-                  : `Upgrade to create more than ${getMaxWebsites()} project${getMaxWebsites() > 1 ? 's' : ''}`
+                  : `Maximum ${maxProjects} projects reached`
                 }
               </CardDescription>
             </CardHeader>
