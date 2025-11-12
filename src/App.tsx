@@ -22,6 +22,7 @@ import RefundsCancellations from "./pages/RefundsCancellations";
 import Cookies from "./pages/Cookies";
 import IntellectualProperty from "./pages/IntellectualProperty";
 import Billing from "./pages/Billing";
+import Credits from "./pages/Credits";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const AppRoutes = () => {
       <Route path="/templates" element={<TemplateGallery />} />
       <Route path="/settings" element={<ProjectSettings />} />
       <Route path="/billing" element={<Billing />} />
+      <Route path="/credits" element={<Credits />} />
       <Route path="/components" element={<ComponentLibrary />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />

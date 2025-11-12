@@ -30,6 +30,9 @@ const Navigation = () => {
             <Link to="/dashboard" className="text-foreground hover:text-primary transition-colors">
               Projects
             </Link>
+            <Link to="/credits" className="text-foreground hover:text-primary transition-colors">
+              Pricing
+            </Link>
             <a href="/#templates" className="text-foreground hover:text-primary transition-colors">
               Catalog
             </a>
@@ -76,6 +79,9 @@ const Navigation = () => {
                 </Link>
                 <Link to="/dashboard" onClick={() => setOpen(false)} className="text-foreground hover:text-primary transition-colors text-lg">
                   Projects
+                </Link>
+                <Link to="/credits" onClick={() => setOpen(false)} className="text-foreground hover:text-primary transition-colors text-lg">
+                  Pricing
                 </Link>
                 <a href="/#templates" onClick={() => setOpen(false)} className="text-foreground hover:text-primary transition-colors text-lg">
                   Catalog
