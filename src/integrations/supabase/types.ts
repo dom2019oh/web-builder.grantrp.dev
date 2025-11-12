@@ -96,44 +96,92 @@ export type Database = {
       }
       projects: {
         Row: {
+          ai_generations_used: number | null
           content: Json | null
           created_at: string
+          custom_domain: string | null
           description: string | null
           favicon_url: string | null
           id: string
           name: string
           published: boolean | null
+          published_at: string | null
           seo_description: string | null
           seo_title: string | null
+          subdomain: string | null
           template_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          ai_generations_used?: number | null
           content?: Json | null
           created_at?: string
+          custom_domain?: string | null
           description?: string | null
           favicon_url?: string | null
           id?: string
           name: string
           published?: boolean | null
+          published_at?: string | null
           seo_description?: string | null
           seo_title?: string | null
+          subdomain?: string | null
           template_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          ai_generations_used?: number | null
           content?: Json | null
           created_at?: string
+          custom_domain?: string | null
           description?: string | null
           favicon_url?: string | null
           id?: string
           name?: string
           published?: boolean | null
+          published_at?: string | null
           seo_description?: string | null
           seo_title?: string | null
+          subdomain?: string | null
           template_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          status: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          status?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -198,6 +246,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_user_publish: { Args: { _user_id: string }; Returns: boolean }
+      get_max_websites: { Args: { _user_id: string }; Returns: number }
+      get_user_plan: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["subscription_plan"]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -208,6 +262,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      subscription_plan: "free" | "starter" | "pro" | "business" | "one_time"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -336,6 +391,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      subscription_plan: ["free", "starter", "pro", "business", "one_time"],
     },
   },
 } as const

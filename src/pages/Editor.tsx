@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Trash2, Search, Bell, Monitor, Tablet, Smartphone, Edi
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { componentTemplates } from "@/components/editor/ComponentTemplates";
 import { ComponentRenderer } from "@/components/editor/ComponentRenderer";
 import { PagesView } from "@/components/editor/PagesView";
@@ -15,6 +16,7 @@ import { StylesView } from "@/components/editor/StylesView";
 import { AssetsView } from "@/components/editor/AssetsView";
 import { SEOView } from "@/components/editor/SEOView";
 import { SettingsView } from "@/components/editor/SettingsView";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 interface Component {
   id: string;
@@ -26,6 +28,7 @@ const Editor = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { canPublish } = useSubscription();
   const [projectName, setProjectName] = useState("");
   const [components, setComponents] = useState<Component[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -34,6 +37,7 @@ const Editor = () => {
   const [deviceView, setDeviceView] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [showTemplates, setShowTemplates] = useState(false);
   const [propertyTab, setPropertyTab] = useState<"content" | "style" | "layout" | "animation">("content");
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   useEffect(() => {
     if (!user || !projectId) {
@@ -173,6 +177,29 @@ const Editor = () => {
     }
   };
 
+  const handlePublish = async () => {
+    if (!canPublish()) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .update({ 
+          published: true,
+          published_at: new Date().toISOString(),
+        })
+        .eq("id", projectId);
+
+      if (error) throw error;
+      toast.success("Project published successfully!");
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to publish");
+    }
+  };
+
   const selectedComponent = components.find((c) => c.id === selectedId);
 
   const getDeviceWidth = () => {
@@ -255,6 +282,13 @@ const Editor = () => {
           <Button onClick={handleSave} size="sm" className="gap-2 bg-gradient-primary hover:opacity-90 transition-opacity shadow-glow">
             <Save className="h-4 w-4" />
             Save
+          </Button>
+          <Button 
+            onClick={handlePublish} 
+            size="sm" 
+            className="gap-2 bg-gradient-button border-0 shadow-glow hover:shadow-glow-magenta transition-all"
+          >
+            Publish
           </Button>
         </div>
       </header>
@@ -558,6 +592,42 @@ const Editor = () => {
           </div>
         </aside>
       </div>
+      
+      {/* Component Templates Modal */}
+      {showTemplates && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="glass glass-glow p-6 rounded-[22px] max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">Add Component</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowTemplates(false)}>✕</Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {componentTemplates.map((template) => (
+                <div
+                  key={template.id}
+                  onClick={() => {
+                    handleAddTemplateComponent(template);
+                    setShowTemplates(false);
+                  }}
+                  className="glass glass-glow p-4 rounded-xl cursor-pointer hover:shadow-glow-magenta transition-all group"
+                >
+                  <h4 className="font-semibold mb-2 group-hover:text-aurora-cyan transition-colors">
+                    {template.name}
+                  </h4>
+                  <p className="text-sm text-muted-foreground">{template.preview}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Upgrade Modal */}
+      <UpgradeModal 
+        open={showUpgradeModal} 
+        onOpenChange={setShowUpgradeModal}
+        feature="Publishing"
+      />
     </div>
   );
 };

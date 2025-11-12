@@ -4,11 +4,14 @@ import { Plus, Settings, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { assignSubdomainToProject } from "@/lib/subdomainUtils";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import InteractiveLighting from "@/components/InteractiveLighting";
+import { Badge } from "@/components/ui/badge";
 
 interface Project {
   id: string;
@@ -21,6 +24,7 @@ interface Project {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
+  const { subscription, getPlanName, getMaxWebsites } = useSubscription();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
 
@@ -50,8 +54,20 @@ const Dashboard = () => {
       console.error(error);
     } else {
       setProjects(data || []);
+      
+      // Auto-assign subdomains to projects that don't have one
+      for (const project of data || []) {
+        if (!project.subdomain) {
+          await assignSubdomainToProject(project.id, user.id);
+        }
+      }
     }
     setLoadingProjects(false);
+  };
+
+  const canCreateMoreProjects = () => {
+    const maxProjects = getMaxWebsites();
+    return projects.length < maxProjects;
   };
 
   const handleDeleteProject = async (projectId: string) => {
@@ -92,28 +108,48 @@ const Dashboard = () => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-3xl font-bold mb-2">Your Projects</h2>
-            <p className="text-foreground/70">Create and manage your websites</p>
+            <p className="text-foreground/70">
+              Create and manage your websites • {projects.length} / {getMaxWebsites()} projects
+            </p>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleSignOut}
-            className="glass"
-          >
-            Sign Out
-          </Button>
+          <div className="flex gap-3 items-center">
+            <Badge variant="outline" className="glass">
+              {getPlanName()} Plan
+            </Badge>
+            <Button 
+              variant="outline" 
+              onClick={handleSignOut}
+              className="glass"
+            >
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card 
-            className="glass glass-glow hover:shadow-glow-magenta transition-all duration-300 cursor-pointer group border-0"
-            onClick={() => navigate("/templates")}
+            className={`glass glass-glow transition-all duration-300 cursor-pointer group border-0 ${
+              canCreateMoreProjects() ? 'hover:shadow-glow-magenta' : 'opacity-50'
+            }`}
+            onClick={() => {
+              if (canCreateMoreProjects()) {
+                navigate("/templates");
+              } else {
+                toast.error(`You've reached your plan limit of ${getMaxWebsites()} project${getMaxWebsites() > 1 ? 's' : ''}. Upgrade to create more!`);
+              }
+            }}
           >
             <CardHeader>
               <div className="w-full h-40 glass rounded-lg mb-4 flex items-center justify-center group-hover:bg-gradient-button/10 transition-colors">
                 <Plus className="h-12 w-12 text-aurora-cyan group-hover:scale-110 transition-transform" />
               </div>
               <CardTitle className="text-foreground">Create New Website</CardTitle>
-              <CardDescription className="text-foreground/70">Start with a template or from scratch</CardDescription>
+              <CardDescription className="text-foreground/70">
+                {canCreateMoreProjects() 
+                  ? "Start with a template or from scratch" 
+                  : `Upgrade to create more than ${getMaxWebsites()} project${getMaxWebsites() > 1 ? 's' : ''}`
+                }
+              </CardDescription>
             </CardHeader>
           </Card>
 
