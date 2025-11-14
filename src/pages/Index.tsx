@@ -6,11 +6,13 @@ import FAQ from "@/components/FAQ";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import InteractiveLighting from "@/components/InteractiveLighting";
+import FloatingUIElements from "@/components/FloatingUIElements";
 
 const Index = () => {
   return (
     <div className="min-h-screen relative">
       <InteractiveLighting />
+      <FloatingUIElements />
       <Navigation />
       <div className="relative z-10">
         <Hero />

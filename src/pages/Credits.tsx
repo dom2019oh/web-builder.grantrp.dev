@@ -4,24 +4,31 @@ import { Coins, ArrowRight, Sparkles, Zap, CheckCircle, AlertCircle } from 'luci
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import InteractiveLighting from '@/components/InteractiveLighting';
+import FloatingUIElements from '@/components/FloatingUIElements';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useCredits, CREDIT_COSTS, CREDIT_PACKS } from '@/hooks/useCredits';
 import { toast } from 'sonner';
 
 const Credits = () => {
   const { user, loading: authLoading } = useAuth();
-  const { credits, loading: creditsLoading, buyCredits, isLowCredits, autoRefillEnabled, updateAutoRefill, getCreditLogs } = useCredits();
+  const { credits, loading: creditsLoading, buyCredits, isLowCredits, autoRefillEnabled, updateAutoRefill, getCreditLogs, getReferralCode, sendReferralInvite, getReferralStats } = useCredits();
   const navigate = useNavigate();
   const [creditLogs, setCreditLogs] = useState<any[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
+  const [referralCode, setReferralCode] = useState<string>('');
+  const [referralStats, setReferralStats] = useState({ total: 0, completed: 0, pending: 0 });
+  const [inviteEmail, setInviteEmail] = useState('');
 
   useEffect(() => {
     if (user) {
       loadCreditLogs();
+      loadReferralData();
     }
   }, [user]);
 
@@ -30,6 +37,31 @@ const Credits = () => {
     const logs = await getCreditLogs(10);
     setCreditLogs(logs);
     setLoadingLogs(false);
+  };
+
+  const loadReferralData = async () => {
+    const code = await getReferralCode();
+    if (code) setReferralCode(code);
+    const stats = await getReferralStats();
+    setReferralStats(stats);
+  };
+
+  const handleSendInvite = async () => {
+    if (!inviteEmail) {
+      toast.error('Please enter an email address');
+      return;
+    }
+    const success = await sendReferralInvite(inviteEmail);
+    if (success) {
+      setInviteEmail('');
+      loadReferralData();
+    }
+  };
+
+  const copyReferralLink = () => {
+    const link = `${window.location.origin}/signup?ref=${referralCode}`;
+    navigator.clipboard.writeText(link);
+    toast.success('Referral link copied to clipboard!');
   };
 
   const handleBuyCredits = (priceId: string) => {
@@ -54,6 +86,7 @@ const Credits = () => {
   return (
     <div className="min-h-screen relative">
       <InteractiveLighting />
+      <FloatingUIElements />
       <Navigation />
       
       <div className="relative z-10 container mx-auto px-4 pt-32 pb-20">
@@ -198,6 +231,66 @@ const Credits = () => {
             </p>
           </Card>
         </div>
+
+        {/* Referral Section (Logged In Only) */}
+        {user && referralCode && (
+          <div className="max-w-4xl mx-auto mb-20">
+            <Card className="glass glass-glow p-8">
+              <h2 className="text-3xl font-bold text-center mb-4">Invite Friends, Earn Credits</h2>
+              <p className="text-center text-muted-foreground mb-8">
+                Share your referral link and earn 100 credits for each friend who signs up!
+              </p>
+
+              <div className="grid md:grid-cols-3 gap-6 mb-8">
+                <div className="glass p-6 rounded-lg text-center">
+                  <div className="text-4xl font-bold text-primary mb-2">{referralStats.total}</div>
+                  <div className="text-sm text-muted-foreground">Total Referrals</div>
+                </div>
+                <div className="glass p-6 rounded-lg text-center">
+                  <div className="text-4xl font-bold text-green-500 mb-2">{referralStats.completed}</div>
+                  <div className="text-sm text-muted-foreground">Completed</div>
+                </div>
+                <div className="glass p-6 rounded-lg text-center">
+                  <div className="text-4xl font-bold text-yellow-500 mb-2">{referralStats.pending}</div>
+                  <div className="text-sm text-muted-foreground">Pending</div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Your Referral Code</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={referralCode} 
+                      readOnly 
+                      className="glass font-mono text-lg"
+                    />
+                    <Button onClick={copyReferralLink} className="glass glass-glow">
+                      Copy Link
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Send Invitation</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      type="email"
+                      placeholder="friend@example.com"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      className="glass"
+                    />
+                    <Button onClick={handleSendInvite} className="glass glass-glow">
+                      <Sparkles className="mr-2 w-4 h-4" />
+                      Invite
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
 
         {/* Recent Transactions (Logged In Only) */}
         {user && creditLogs.length > 0 && (

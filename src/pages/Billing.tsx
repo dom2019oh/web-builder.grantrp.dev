@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Coins, CreditCard, History, Settings, Zap } from 'lucide-react';
 import { toast } from 'sonner';
+import InteractiveLighting from '@/components/InteractiveLighting';
+import FloatingUIElements from '@/components/FloatingUIElements';
 
 export default function Billing() {
   const navigate = useNavigate();
@@ -50,9 +52,11 @@ export default function Billing() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      <InteractiveLighting />
+      <FloatingUIElements />
       {/* Header */}
-      <div className="border-b border-border/40 bg-card/30 backdrop-blur-xl">
+      <div className="border-b border-border/40 glass glass-glow relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center gap-4">
             <Button
@@ -75,7 +79,7 @@ export default function Billing() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8 relative z-10">
         {/* Current Balance */}
         <Card className="glass glass-glow border-border/50 p-6">
           <div className="flex items-center justify-between">

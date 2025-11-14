@@ -55,6 +55,8 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          referral_code: string | null
+          referred_by: string | null
           updated_at: string
         }
         Insert: {
@@ -67,6 +69,8 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
         }
         Update: {
@@ -79,6 +83,8 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -190,6 +196,39 @@ export type Database = {
           template_id?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          credits_awarded: boolean | null
+          id: string
+          referred_email: string
+          referred_user_id: string | null
+          referrer_id: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          credits_awarded?: boolean | null
+          id?: string
+          referred_email: string
+          referred_user_id?: string | null
+          referrer_id: string
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          credits_awarded?: boolean | null
+          id?: string
+          referred_email?: string
+          referred_user_id?: string | null
+          referrer_id?: string
+          status?: string
         }
         Relationships: []
       }
@@ -307,6 +346,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      generate_referral_code: { Args: never; Returns: string }
       get_max_websites: { Args: { _user_id: string }; Returns: number }
       get_user_plan: {
         Args: { _user_id: string }
@@ -317,6 +357,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      process_referral_bonus: {
+        Args: { _referral_code: string; _referred_user_id: string }
         Returns: boolean
       }
     }

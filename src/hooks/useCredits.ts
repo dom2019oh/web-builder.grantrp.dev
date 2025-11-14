@@ -218,6 +218,70 @@ export const useCredits = () => {
     }
   };
 
+  const getReferralCode = async (): Promise<string | null> => {
+    if (!user) return null;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('referral_code')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      return data?.referral_code || null;
+    } catch (error) {
+      console.error('Error fetching referral code:', error);
+      return null;
+    }
+  };
+
+  const sendReferralInvite = async (email: string) => {
+    if (!user) {
+      toast.error('Please log in to send referrals');
+      return false;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('referrals')
+        .insert({
+          referrer_id: user.id,
+          referred_email: email,
+        });
+
+      if (error) throw error;
+      toast.success(`Referral invitation sent to ${email}`);
+      return true;
+    } catch (error) {
+      console.error('Error sending referral:', error);
+      toast.error('Failed to send referral invitation');
+      return false;
+    }
+  };
+
+  const getReferralStats = async () => {
+    if (!user) return { total: 0, completed: 0, pending: 0 };
+
+    try {
+      const { data, error } = await supabase
+        .from('referrals')
+        .select('*')
+        .eq('referrer_id', user.id);
+
+      if (error) throw error;
+
+      const total = data?.length || 0;
+      const completed = data?.filter(r => r.status === 'completed').length || 0;
+      const pending = data?.filter(r => r.status === 'pending').length || 0;
+
+      return { total, completed, pending };
+    } catch (error) {
+      console.error('Error fetching referral stats:', error);
+      return { total: 0, completed: 0, pending: 0 };
+    }
+  };
+
   return {
     credits,
     loading,
@@ -227,6 +291,9 @@ export const useCredits = () => {
     getCreditLogs,
     updateAutoRefill,
     buyCredits,
+    getReferralCode,
+    sendReferralInvite,
+    getReferralStats,
     refetch: fetchCredits,
     hasEnoughCredits: (cost: number) => credits >= cost,
     isLowCredits: credits <= 50,
