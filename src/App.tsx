@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import LoadingScreen from "@/components/LoadingScreen";
+import FloatingCreditsButton from "@/components/FloatingCreditsButton";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -69,6 +70,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <FloatingCreditsButton />
           <AppRoutes />
         </BrowserRouter>
       </TooltipProvider>

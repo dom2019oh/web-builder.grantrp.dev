@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
 import { componentTemplates } from "@/components/editor/ComponentTemplates";
 import { ComponentRenderer } from "@/components/editor/ComponentRenderer";
 import { PagesView } from "@/components/editor/PagesView";
@@ -17,6 +18,7 @@ import { AssetsView } from "@/components/editor/AssetsView";
 import { SEOView } from "@/components/editor/SEOView";
 import { SettingsView } from "@/components/editor/SettingsView";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import EditorCreditCost from "@/components/EditorCreditCost";
 
 interface Component {
   id: string;
@@ -29,6 +31,7 @@ const Editor = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { canPublish } = useSubscription();
+  const { deductCredits, hasEnoughCredits } = useCredits();
   const [projectName, setProjectName] = useState("");
   const [components, setComponents] = useState<Component[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
