@@ -19,6 +19,13 @@ import { SEOView } from "@/components/editor/SEOView";
 import { SettingsView } from "@/components/editor/SettingsView";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import EditorCreditCost from "@/components/EditorCreditCost";
+import { CreditConfirmDialog } from "@/components/editor/CreditConfirmDialog";
+import { AIContentGenerator } from "@/components/editor/AIContentGenerator";
+import { ImageManager } from "@/components/editor/ImageManager";
+import { FormBuilder } from "@/components/editor/FormBuilder";
+import { AnimationControls } from "@/components/editor/AnimationControls";
+import { AdvancedStylePanel } from "@/components/editor/AdvancedStylePanel";
+import { BlogPostCreator } from "@/components/editor/BlogPostCreator";
 
 interface Component {
   id: string;
@@ -31,7 +38,7 @@ const Editor = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { canPublish } = useSubscription();
-  const { deductCredits, hasEnoughCredits } = useCredits();
+  const { deductCredits, hasEnoughCredits, credits } = useCredits();
   const [projectName, setProjectName] = useState("");
   const [components, setComponents] = useState<Component[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -41,6 +48,12 @@ const Editor = () => {
   const [showTemplates, setShowTemplates] = useState(false);
   const [propertyTab, setPropertyTab] = useState<"content" | "style" | "layout" | "animation">("content");
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [creditConfirm, setCreditConfirm] = useState<{
+    open: boolean;
+    action: string;
+    cost: number;
+    callback: () => void;
+  }>({ open: false, action: "", cost: 0, callback: () => {} });
 
   useEffect(() => {
     if (!user || !projectId) {
@@ -99,8 +112,27 @@ const Editor = () => {
     }
   };
 
+  const handleCostCheck = (cost: number, action: string, callback: () => void) => {
+    if (!hasEnoughCredits(cost)) {
+      toast.error("Insufficient credits! Please add more credits.");
+      navigate("/credits");
+      return;
+    }
+    setCreditConfirm({ open: true, action, cost, callback });
+  };
+
+  const handleConfirmAction = async () => {
+    const success = await deductCredits(creditConfirm.action, creditConfirm.cost);
+    if (success) {
+      creditConfirm.callback();
+    }
+    setCreditConfirm({ open: false, action: "", cost: 0, callback: () => {} });
+  };
+
   const handleAddComponent = async () => {
-    setShowTemplates(true);
+    handleCostCheck(CREDIT_COSTS.ADD_COMPONENT, "Add Component", () => {
+      setShowTemplates(true);
+    });
   };
 
   const handleAddTemplateComponent = async (template: any) => {
