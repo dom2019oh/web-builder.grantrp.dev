@@ -52,12 +52,12 @@ export default function Billing() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       <InteractiveLighting />
       <FloatingUIElements />
       {/* Header */}
       <div className="border-b border-border/40 glass glass-glow relative z-10">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-6">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
@@ -79,7 +79,7 @@ export default function Billing() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-8 space-y-8 relative z-10">
         {/* Current Balance */}
         <Card className="glass glass-glow border-border/50 p-6">
           <div className="flex items-center justify-between">
