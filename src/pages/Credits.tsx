@@ -84,12 +84,12 @@ const Credits = () => {
   ];
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-hidden">
       <InteractiveLighting />
       <FloatingUIElements />
       <Navigation />
       
-      <div className="relative z-10 container mx-auto px-4 pt-32 pb-20">
+      <div className="relative z-10 container mx-auto px-6 lg:px-12 pt-32 pb-20 max-w-7xl">
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 glass glass-glow rounded-full mb-6">

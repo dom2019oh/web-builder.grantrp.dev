@@ -24,6 +24,7 @@ import Cookies from "./pages/Cookies";
 import IntellectualProperty from "./pages/IntellectualProperty";
 import Billing from "./pages/Billing";
 import Credits from "./pages/Credits";
+import Store from "./pages/Store";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const AppRoutes = () => {
       <Route path="/settings" element={<ProjectSettings />} />
       <Route path="/billing" element={<Billing />} />
       <Route path="/credits" element={<Credits />} />
+      <Route path="/store" element={<Store />} />
       <Route path="/components" element={<ComponentLibrary />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
