@@ -45,7 +45,7 @@ All colors MUST be HSL.
     --input: 0 0% 100% / 0.05;
     --ring: 188 95% 59%;
 
-    --radius: 0.75rem;
+    --radius: 1.5rem;
 
     /* Aurora Gradients */
     --gradient-aurora-magenta-cyan: linear-gradient(135deg, #6C4DFF 0%, #D34DFE 50%, #37E7F7 100%);
@@ -54,11 +54,13 @@ All colors MUST be HSL.
     --gradient-card: linear-gradient(135deg, #2DD6C8 0%, #0080FF 60%, #1D1B4C 100%);
     --gradient-button: linear-gradient(90deg, #37E7F7, #D34DFE);
     
-    /* Glass Morphism */
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.15);
-    --glass-shadow: 0 0 20px rgba(100, 200, 255, 0.1);
-    --glass-glow-inner: inset 0 0 25px rgba(255, 255, 255, 0.1);
+    /* Glass Morphism - Liquid Glass Effect */
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px rgba(100, 200, 255, 0.15);
+    --glass-blur: blur(25px);
+    --glass-glow-inner: inset 0 0 30px rgba(255, 255, 255, 0.15);
+    --glass-reflection: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
     
     /* Shadows & Glows */
     --shadow-glow: 0 0 40px rgba(55, 231, 247, 0.3);
@@ -108,11 +110,13 @@ All colors MUST be HSL.
     --input: 220 13% 90%;
     --ring: 188 95% 45%;
 
-    /* Glass Morphism - Light mode */
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(55, 231, 247, 0.2);
-    --glass-shadow: 0 0 20px rgba(100, 200, 255, 0.15);
-    --glass-glow-inner: inset 0 0 25px rgba(55, 231, 247, 0.1);
+    /* Glass Morphism - Light mode Liquid Glass */
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(55, 231, 247, 0.25);
+    --glass-shadow: 0 8px 32px rgba(100, 200, 255, 0.2);
+    --glass-blur: blur(25px);
+    --glass-glow-inner: inset 0 0 30px rgba(55, 231, 247, 0.15);
+    --glass-reflection: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
     
     /* Shadows & Glows - Light mode */
     --shadow-glow: 0 0 40px rgba(55, 231, 247, 0.4);
@@ -244,6 +248,35 @@ All colors MUST be HSL.
 
   .animate-fade-in {
     animation: fade-in 0.5s ease-out;
+  }
+
+  /* Liquid Glass Effect Utilities */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-glow {
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-reflection {
+    position: relative;
+  }
+
+  .glass-reflection::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--glass-reflection);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .glass-inner-glow {
+    box-shadow: var(--glass-glow-inner);
   }
 }
 

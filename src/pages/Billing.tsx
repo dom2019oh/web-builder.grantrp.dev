@@ -56,14 +56,14 @@ export default function Billing() {
       <InteractiveLighting />
       <FloatingUIElements />
       {/* Header */}
-      <div className="border-b border-border/40 glass glass-glow relative z-10">
+      <div className="border-b border-border/40 bg-card/30 backdrop-blur-xl shadow-glass relative z-10">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-6">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/dashboard')}
-              className="glass glass-glow rounded-xl"
+              className="rounded-2xl hover:bg-card/50 backdrop-blur-xl"
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -81,7 +81,7 @@ export default function Billing() {
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-8 space-y-8 relative z-10">
         {/* Current Balance */}
-        <Card className="glass glass-glow border-border/50 p-6">
+        <Card className="bg-card/50 backdrop-blur-xl border-border/50 shadow-glass p-6 hover:shadow-glow transition-all duration-300">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Current Balance</p>

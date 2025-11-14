@@ -14,6 +14,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Editor from "./pages/Editor";
 import TemplateGallery from "./pages/TemplateGallery";
+import TemplateMarket from "./pages/TemplateMarket";
 import ProjectSettings from "./pages/ProjectSettings";
 import ComponentLibrary from "./pages/ComponentLibrary";
 import Contact from "./pages/Contact";
@@ -48,6 +49,7 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/editor/:projectId" element={<Editor />} />
       <Route path="/templates" element={<TemplateGallery />} />
+      <Route path="/template-market" element={<TemplateMarket />} />
       <Route path="/settings" element={<ProjectSettings />} />
       <Route path="/billing" element={<Billing />} />
       <Route path="/credits" element={<Credits />} />
