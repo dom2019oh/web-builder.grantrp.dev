@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { PageTransition } from "@/components/PageTransition";
 import LoadingScreen from "@/components/LoadingScreen";
 import FloatingCreditsButton from "@/components/FloatingCreditsButton";
 import Index from "./pages/Index";
@@ -42,8 +43,9 @@ const AppRoutes = () => {
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
+    <PageTransition>
+      <Routes>
+        <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/dashboard" element={<Dashboard />} />
@@ -60,10 +62,11 @@ const AppRoutes = () => {
       <Route path="/terms-of-use" element={<TermsOfUse />} />
       <Route path="/refunds-cancellations" element={<RefundsCancellations />} />
       <Route path="/cookies" element={<Cookies />} />
-      <Route path="/intellectual-property" element={<IntellectualProperty />} />
-      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        <Route path="/intellectual-property" element={<IntellectualProperty />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </PageTransition>
   );
 };
 
