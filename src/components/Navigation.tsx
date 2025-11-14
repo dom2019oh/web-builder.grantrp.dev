@@ -33,9 +33,9 @@ const Navigation = () => {
             <Link to="/credits" className="text-foreground hover:text-primary transition-colors">
               Pricing
             </Link>
-            <a href="/#templates" className="text-foreground hover:text-primary transition-colors">
-              Catalog
-            </a>
+            <Link to="/template-market" className="text-foreground hover:text-primary transition-colors">
+              Templates
+            </Link>
             <Link to="/contact" className="text-foreground hover:text-primary transition-colors">
               Contact
             </Link>
@@ -83,9 +83,9 @@ const Navigation = () => {
                 <Link to="/credits" onClick={() => setOpen(false)} className="text-foreground hover:text-primary transition-colors text-lg">
                   Pricing
                 </Link>
-                <a href="/#templates" onClick={() => setOpen(false)} className="text-foreground hover:text-primary transition-colors text-lg">
-                  Catalog
-                </a>
+                <Link to="/template-market" onClick={() => setOpen(false)} className="text-foreground hover:text-primary transition-colors text-lg">
+                  Templates
+                </Link>
                 <Link to="/contact" onClick={() => setOpen(false)} className="text-foreground hover:text-primary transition-colors text-lg">
                   Contact
                 </Link>

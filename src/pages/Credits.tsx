@@ -92,8 +92,8 @@ const Credits = () => {
       <div className="relative z-10 container mx-auto px-6 lg:px-12 pt-32 pb-20 max-w-7xl">
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 glass glass-glow rounded-full mb-6">
-            <Sparkles className="w-4 h-4 text-primary" />
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-card/50 backdrop-blur-xl border border-border shadow-glass mb-6">
+            <Sparkles className="w-4 h-4 text-primary animate-pulse" />
             <span className="text-sm font-medium">Simple, Transparent Pricing</span>
           </div>
           
