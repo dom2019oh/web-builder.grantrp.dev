@@ -12,9 +12,9 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useCredits, CREDIT_COSTS } from "@/hooks/useCredits";
 import { componentTemplates } from "@/components/editor/ComponentTemplates";
 import { ComponentRenderer } from "@/components/editor/ComponentRenderer";
-import { PagesView } from "@/components/editor/PagesView";
+import { PagesManager } from "@/components/editor/PagesManager";
 import { StylesView } from "@/components/editor/StylesView";
-import { AssetsView } from "@/components/editor/AssetsView";
+import { AssetsManager } from "@/components/editor/AssetsManager";
 import { SEOView } from "@/components/editor/SEOView";
 import { SettingsView } from "@/components/editor/SettingsView";
 import { UpgradeModal } from "@/components/UpgradeModal";
@@ -430,9 +430,9 @@ const Editor = () => {
               </div>
             )}
 
-            {activeView === "pages" && <PagesView />}
-            {activeView === "styles" && <StylesView />}
-            {activeView === "assets" && <AssetsView />}
+              {activeView === "pages" && <PagesManager />}
+              {activeView === "styles" && <StylesView />}
+              {activeView === "assets" && <AssetsManager />}
             {activeView === "seo" && <SEOView />}
             {activeView === "settings" && <SettingsView />}
           </div>
@@ -449,6 +449,7 @@ const Editor = () => {
                     component={component}
                     isSelected={selectedId === component.id}
                     onClick={() => setSelectedId(component.id)}
+                    onUpdate={(props) => handleUpdateComponent(component.id, props)}
                   />
                 ))}
                 {components.length === 0 && (
