@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Search, Bell, Monitor, Tablet, Smartphone, Edit3, Undo, Redo, Eye, Layout as LayoutIcon, Grid3X3, Layers as LayersIcon, Sparkles, Grid2X2 } from "lucide-react";
+import { ArrowLeft, Save, Search, Bell, Monitor, Tablet, Smartphone, Edit3, Undo, Redo, Eye, Layout as LayoutIcon, Grid3X3, Layers as LayersIcon, Sparkles, Grid2X2, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +14,7 @@ import { DraggableComponent } from "@/components/editor/DraggableComponent";
 import { LayerPanel } from "@/components/editor/LayerPanel";
 import { ComponentLibrary } from "@/components/editor/ComponentLibrary";
 import { AIGenerationPanel } from "@/components/editor/AIGenerationPanel";
+import { InspectorPanel } from "@/components/editor/InspectorPanel";
 import { SnapGrid } from "@/components/editor/SnapGrid";
 import { useEditorHistory } from "@/hooks/useEditorHistory";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,7 +38,7 @@ const Editor = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [deviceView, setDeviceView] = useState<"desktop" | "tablet" | "mobile">("desktop");
-  const [rightPanel, setRightPanel] = useState<"library" | "layers" | "ai" | null>("library");
+  const [rightPanel, setRightPanel] = useState<"library" | "layers" | "ai" | "inspector" | null>("library");
   const [showGrid, setShowGrid] = useState(true);
   
   const { addToHistory, undo, redo, canUndo, canRedo } = useEditorHistory(components);
@@ -57,6 +58,13 @@ const Editor = () => {
   useEffect(() => {
     addToHistory(components);
   }, [components]);
+
+  // Auto-open inspector when component is selected
+  useEffect(() => {
+    if (selectedId && rightPanel !== "inspector") {
+      setRightPanel("inspector");
+    }
+  }, [selectedId]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -500,7 +508,7 @@ const Editor = () => {
           </div>
         </main>
 
-        {/* Right Panel - Component Library or Layers */}
+        {/* Right Panel - Component Library, Layers, AI, or Inspector */}
         <AnimatePresence mode="wait">
           {rightPanel && (
             <motion.aside
@@ -540,6 +548,16 @@ const Editor = () => {
                 >
                   <Sparkles className="h-4 w-4" />
                 </Button>
+                <Button
+                  variant={rightPanel === "inspector" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-10 w-10 p-0 glass border border-border/50"
+                  onClick={() => setRightPanel(rightPanel === "inspector" ? null : "inspector")}
+                  title="Inspector"
+                  disabled={!selectedComponent}
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
               </div>
 
               {rightPanel === "library" && (
@@ -558,6 +576,14 @@ const Editor = () => {
 
               {rightPanel === "ai" && (
                 <AIGenerationPanel onGenerate={handleAIGenerate} />
+              )}
+
+              {rightPanel === "inspector" && selectedComponent && (
+                <InspectorPanel
+                  component={selectedComponent}
+                  onUpdate={(props) => handleUpdateComponent(selectedComponent.id, props)}
+                  onDelete={() => handleDeleteComponent(selectedComponent.id)}
+                />
               )}
             </motion.aside>
           )}
@@ -596,6 +622,16 @@ const Editor = () => {
               title="AI Generate"
             >
               <Sparkles className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-10 w-10 p-0 glass-strong border border-border/50 shadow-premium hover-lift"
+              onClick={() => setRightPanel("inspector")}
+              title="Inspector"
+              disabled={!selectedComponent}
+            >
+              <Settings className="h-4 w-4" />
             </Button>
           </motion.div>
         )}
