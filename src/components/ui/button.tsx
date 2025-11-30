@@ -5,18 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-liquid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 relative overflow-hidden",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "glass-liquid shadow-glow hover:shadow-premium-lg hover:-translate-y-1 text-foreground font-semibold",
-        destructive: "bg-destructive/90 text-destructive-foreground shadow-glow hover:shadow-premium-lg hover:-translate-y-1 backdrop-blur-liquid",
-        outline: "glass border-glass-border-bright hover:bg-glass-bg-hover hover:shadow-glow",
-        secondary: "glass-strong text-foreground hover:shadow-glow-violet hover:-translate-y-0.5",
-        ghost: "hover:bg-primary/10 hover:text-primary transition-liquid",
-        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80",
-        liquid: "glass-liquid shadow-glow hover:shadow-premium-lg hover:scale-105 text-foreground font-semibold",
-        chrome: "glass-chrome shadow-premium-lg hover:shadow-glow hover:scale-105 text-foreground font-bold",
+        default: "bg-primary text-primary-foreground shadow-premium hover:shadow-premium-lg hover:-translate-y-0.5",
+        destructive: "bg-destructive text-destructive-foreground shadow-premium hover:shadow-premium-lg hover:-translate-y-0.5",
+        outline: "border border-border/50 bg-card/50 backdrop-blur-premium hover:bg-card hover:border-primary/50",
+        secondary: "bg-secondary text-secondary-foreground backdrop-blur-premium hover:bg-secondary/80",
+        ghost: "hover:bg-accent/10 hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-5 py-2.5",
