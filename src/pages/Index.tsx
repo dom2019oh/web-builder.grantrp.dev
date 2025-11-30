@@ -11,15 +11,15 @@ import FloatingUIElements from "@/components/FloatingUIElements";
 const Index = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
-      <InteractiveLighting />
-      <FloatingUIElements />
       <Navigation />
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+      <div className="relative z-10">
         <Hero />
-        <Features />
-        <Templates />
-        <Pricing />
-        <FAQ />
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <Features />
+          <Templates />
+          <Pricing />
+          <FAQ />
+        </div>
       </div>
       <Footer />
     </div>
