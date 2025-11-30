@@ -52,37 +52,52 @@ export const ComponentRenderer = ({ component, isSelected, onClick, onUpdate }: 
     if (isEditing && isSelected) {
       if (multiline) {
         return (
-          <textarea
+          <div className="relative">
+            <textarea
+              ref={inputRef as any}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={() => handleBlur(field)}
+              onKeyDown={(e) => handleKeyDown(e, field)}
+              className={`${className} glass-strong border-2 border-primary outline-none rounded-xl px-3 py-2 shadow-glow w-full`}
+              rows={3}
+            />
+            <div className="absolute -top-8 right-0 glass-strong border border-border/50 rounded-lg px-2 py-1 text-xs text-muted-foreground">
+              Enter to save • Esc to cancel
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="relative">
+          <input
             ref={inputRef as any}
+            type="text"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={() => handleBlur(field)}
             onKeyDown={(e) => handleKeyDown(e, field)}
-            className={`${className} bg-primary/10 border-2 border-primary outline-none rounded-md px-2`}
-            rows={3}
+            className={`${className} glass-strong border-2 border-primary outline-none rounded-xl px-3 py-2 shadow-glow w-full`}
           />
-        );
-      }
-      return (
-        <input
-          ref={inputRef as any}
-          type="text"
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={() => handleBlur(field)}
-          onKeyDown={(e) => handleKeyDown(e, field)}
-          className={`${className} bg-primary/10 border-2 border-primary outline-none rounded-md px-2`}
-        />
+          <div className="absolute -top-8 right-0 glass-strong border border-border/50 rounded-lg px-2 py-1 text-xs text-muted-foreground">
+            Enter to save • Esc to cancel
+          </div>
+        </div>
       );
     }
 
     return (
       <div
         onDoubleClick={(e) => handleDoubleClick(e, field, text)}
-        className={`${className} cursor-text hover:bg-primary/5 rounded-md px-2 transition-colors`}
+        className={`${className} cursor-text hover:bg-primary/5 hover:ring-1 hover:ring-primary/20 rounded-xl px-3 py-1 transition-smooth relative group`}
         title="Double-click to edit"
       >
         {text}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          <div className="absolute top-0 right-0 text-[10px] text-primary/60 bg-primary/10 px-1.5 py-0.5 rounded-bl-md rounded-tr-xl">
+            Edit
+          </div>
+        </div>
       </div>
     );
   };
@@ -214,16 +229,27 @@ export const ComponentRenderer = ({ component, isSelected, onClick, onUpdate }: 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.2 }}
-      className={`p-4 rounded-lg border-2 transition-all cursor-pointer hover:shadow-md ${
+      transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+      className={`p-6 rounded-2xl border-2 transition-smooth cursor-pointer relative group ${
         isSelected 
-          ? "border-primary bg-primary/5 shadow-glow" 
-          : "border-border bg-background hover:border-primary/50"
+          ? "border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-glow ring-1 ring-primary/20" 
+          : "border-border/50 bg-background/50 hover:border-primary/50 hover:shadow-md"
       }`}
       onClick={onClick}
+      whileHover={{ scale: 1.005 }}
+      whileTap={{ scale: 0.995 }}
     >
-      <div className="text-xs font-medium text-muted-foreground mb-2 uppercase">
-        {component.component_type}
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider glass-soft px-2 py-1 rounded-lg">
+          {component.component_type}
+        </div>
+        {isSelected && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="h-2 w-2 rounded-full bg-primary shadow-glow"
+          />
+        )}
       </div>
       {renderContent()}
     </motion.div>

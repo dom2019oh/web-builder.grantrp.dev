@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Search, Bell, Monitor, Tablet, Smartphone, Edit3, Undo, Redo, Eye, Layout as LayoutIcon, Grid3X3, Layers as LayersIcon, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, Search, Bell, Monitor, Tablet, Smartphone, Edit3, Undo, Redo, Eye, Layout as LayoutIcon, Grid3X3, Layers as LayersIcon, Sparkles, Grid2X2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +14,7 @@ import { DraggableComponent } from "@/components/editor/DraggableComponent";
 import { LayerPanel } from "@/components/editor/LayerPanel";
 import { ComponentLibrary } from "@/components/editor/ComponentLibrary";
 import { AIGenerationPanel } from "@/components/editor/AIGenerationPanel";
+import { SnapGrid } from "@/components/editor/SnapGrid";
 import { useEditorHistory } from "@/hooks/useEditorHistory";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -37,6 +38,7 @@ const Editor = () => {
   const [loading, setLoading] = useState(true);
   const [deviceView, setDeviceView] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [rightPanel, setRightPanel] = useState<"library" | "layers" | "ai" | null>("library");
+  const [showGrid, setShowGrid] = useState(true);
   
   const { addToHistory, undo, redo, canUndo, canRedo } = useEditorHistory(components);
 
@@ -55,6 +57,34 @@ const Editor = () => {
   useEffect(() => {
     addToHistory(components);
   }, [components]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Undo: Cmd+Z or Ctrl+Z
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+      // Redo: Cmd+Shift+Z or Ctrl+Shift+Z
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z') {
+        e.preventDefault();
+        handleRedo();
+      }
+      // Toggle grid: G
+      if (e.key === 'g' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const activeElement = document.activeElement as HTMLElement;
+        // Only toggle if not typing in an input
+        if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
+          setShowGrid(prev => !prev);
+          toast.success(`Grid ${showGrid ? 'hidden' : 'shown'}`);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canUndo, canRedo, showGrid]);
 
   const loadProject = async () => {
     if (!user || !projectId) {
@@ -365,7 +395,7 @@ const Editor = () => {
               size="sm" 
               className="h-8 w-8 p-0"
               onClick={() => setDeviceView("desktop")}
-              title="Desktop View"
+              title="Desktop View (1920px)"
             >
               <Monitor className="h-4 w-4" />
             </Button>
@@ -374,7 +404,7 @@ const Editor = () => {
               size="sm" 
               className="h-8 w-8 p-0"
               onClick={() => setDeviceView("tablet")}
-              title="Tablet View"
+              title="Tablet View (768px)"
             >
               <Tablet className="h-4 w-4" />
             </Button>
@@ -383,11 +413,21 @@ const Editor = () => {
               size="sm" 
               className="h-8 w-8 p-0"
               onClick={() => setDeviceView("mobile")}
-              title="Mobile View"
+              title="Mobile View (375px)"
             >
               <Smartphone className="h-4 w-4" />
             </Button>
           </div>
+
+          <Button 
+            variant={showGrid ? "secondary" : "ghost"}
+            size="sm" 
+            className="h-8 w-8 p-0 glass border border-border/50"
+            onClick={() => setShowGrid(!showGrid)}
+            title="Toggle Grid (G)"
+          >
+            <Grid2X2 className="h-4 w-4" />
+          </Button>
           
           <Button variant="outline" size="sm" className="gap-2 hidden sm:flex">
             <Eye className="h-4 w-4" />
@@ -409,14 +449,16 @@ const Editor = () => {
         {/* Main Canvas */}
         <main className="flex-1 overflow-y-auto bg-muted/30 relative">
           <div className={`${getDeviceWidth()} mx-auto p-8 transition-smooth`}>
-            <div className="glass-strong rounded-2xl shadow-premium-lg min-h-[800px] p-8 border border-border/30">
+            <div className="glass-strong rounded-2xl shadow-premium-lg min-h-[800px] p-8 border border-border/30 relative overflow-hidden">
+              <SnapGrid show={showGrid} gridSize={20} />
+              
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
                 onDragEnd={handleDragEnd}
               >
                 <SortableContext items={components.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-                  <div className="space-y-4 pl-8">
+                  <div className="space-y-4 pl-8 relative z-10">
                     <AnimatePresence mode="popLayout">
                       {components.map((component) => (
                         <DraggableComponent
