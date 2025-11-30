@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Sun, Moon } from "lucide-react";
-import logo from "@/assets/logo-color.png";
+import { Menu, Sun, Moon, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,118 +11,93 @@ const Navigation = () => {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
 
+  const navItems = [
+    { path: "/", label: "Home" },
+    { path: "/dashboard", label: "Projects" },
+    { path: "/credits", label: "Pricing" },
+    { path: "/template-market", label: "Templates" },
+    { path: "/contact", label: "Contact" },
+  ];
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass backdrop-blur-premium border-b border-border/50 transition-smooth">
-      <div className="container mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 hover-lift group">
-            <img src={logo} alt="Grant Development Logo" className="h-10 w-10 transition-transform group-hover:scale-110" />
-            <span className="text-xl font-display font-semibold bg-gradient-primary bg-clip-text text-transparent">
-              Grant Development™
+    <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl">
+      <div className="glass-liquid rounded-2xl border-glass-border-bright shadow-glow transition-liquid">
+        <div className="container mx-auto flex h-16 items-center justify-between px-6">
+          <Link to="/" className="flex items-center space-x-3 hover-scale group">
+            <div className="relative h-10 w-10 rounded-xl glass-chrome p-2 shadow-glow group-hover:shadow-premium-lg transition-liquid">
+              <Sparkles className="h-full w-full text-primary animate-pulse-glow" />
+            </div>
+            <span className="text-xl font-display font-bold bg-gradient-liquid bg-clip-text text-transparent">
+              Grant Development
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
-            <Link to="/" className="text-sm font-medium text-foreground/80 hover:text-primary transition-smooth">
-              Home
-            </Link>
-            <Link to="/dashboard" className="text-sm font-medium text-foreground/80 hover:text-primary transition-smooth">
-              Projects
-            </Link>
-            <Link to="/credits" className="text-sm font-medium text-foreground/80 hover:text-primary transition-smooth">
-              Pricing
-            </Link>
-            <Link to="/template-market" className="text-sm font-medium text-foreground/80 hover:text-primary transition-smooth">
-              Templates
-            </Link>
-            <Link to="/contact" className="text-sm font-medium text-foreground/80 hover:text-primary transition-smooth">
-              Contact
-            </Link>
-          </div>
+          <nav className="hidden md:flex items-center space-x-8">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="text-sm font-medium text-muted-foreground hover:text-primary transition-liquid relative group"
+              >
+                {item.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-liquid group-hover:w-full transition-liquid" />
+              </Link>
+            ))}
+          </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="text-foreground/80 hover:text-primary hover-lift"
+              className="rounded-full hover-glow"
             >
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
             </Button>
-            {!user && (
+
+            {!user ? (
               <>
-                <Link to="/login">
-                  <Button variant="ghost" className="text-sm font-medium">
-                    Sign In
-                  </Button>
+                <Link to="/login" className="hidden sm:block">
+                  <Button variant="ghost">Sign In</Button>
                 </Link>
                 <Link to="/signup">
-                  <Button className="bg-gradient-primary shadow-glow hover-lift hover-glow text-sm font-medium">
-                    Get Started
-                  </Button>
+                  <Button variant="liquid" className="hover-lift">Get Started</Button>
                 </Link>
               </>
+            ) : (
+              <Link to="/dashboard">
+                <Button variant="liquid" className="hover-lift">Dashboard</Button>
+              </Link>
             )}
-          </div>
 
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="glass-strong border-border/50">
-              <div className="flex flex-col gap-6 mt-8">
-                <Link to="/" onClick={() => setOpen(false)} className="text-foreground/80 hover:text-primary transition-smooth text-lg font-medium">
-                  Home
-                </Link>
-                <Link to="/dashboard" onClick={() => setOpen(false)} className="text-foreground/80 hover:text-primary transition-smooth text-lg font-medium">
-                  Projects
-                </Link>
-                <Link to="/credits" onClick={() => setOpen(false)} className="text-foreground/80 hover:text-primary transition-smooth text-lg font-medium">
-                  Pricing
-                </Link>
-                <Link to="/template-market" onClick={() => setOpen(false)} className="text-foreground/80 hover:text-primary transition-smooth text-lg font-medium">
-                  Templates
-                </Link>
-                <Link to="/contact" onClick={() => setOpen(false)} className="text-foreground/80 hover:text-primary transition-smooth text-lg font-medium">
-                  Contact
-                </Link>
-                <Button
-                  variant="ghost"
-                  onClick={toggleTheme}
-                  className="text-foreground hover:text-primary justify-start"
-                >
-                  {theme === "dark" ? (
-                    <>
-                      <Sun className="h-5 w-5 mr-2" /> Light Mode
-                    </>
-                  ) : (
-                    <>
-                      <Moon className="h-5 w-5 mr-2" /> Dark Mode
-                    </>
-                  )}
+            <Sheet>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Menu className="h-5 w-5" />
                 </Button>
-                {!user && (
-                  <div className="flex flex-col gap-3 mt-4">
-                    <Link to="/login" onClick={() => setOpen(false)}>
-                      <Button variant="ghost" className="w-full">
-                        Sign In
-                      </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px] glass-liquid border-glass-border-bright">
+                <nav className="flex flex-col space-y-4 mt-8">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className="text-lg font-medium text-muted-foreground hover:text-primary transition-liquid px-4 py-2 rounded-xl hover:bg-primary/10"
+                    >
+                      {item.label}
                     </Link>
-                    <Link to="/signup" onClick={() => setOpen(false)}>
-                      <Button className="w-full bg-gradient-primary shadow-glow">
-                        Get Started
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
-    </nav>
+    </header>
   );
 };
 
