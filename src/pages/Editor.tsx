@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Search, Bell, Monitor, Tablet, Smartphone, Edit3, Undo, Redo, Eye, Layout as LayoutIcon, Grid3X3, Layers as LayersIcon } from "lucide-react";
+import { ArrowLeft, Save, Search, Bell, Monitor, Tablet, Smartphone, Edit3, Undo, Redo, Eye, Layout as LayoutIcon, Grid3X3, Layers as LayersIcon, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,6 +13,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { DraggableComponent } from "@/components/editor/DraggableComponent";
 import { LayerPanel } from "@/components/editor/LayerPanel";
 import { ComponentLibrary } from "@/components/editor/ComponentLibrary";
+import { AIGenerationPanel } from "@/components/editor/AIGenerationPanel";
 import { useEditorHistory } from "@/hooks/useEditorHistory";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -35,7 +36,7 @@ const Editor = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [deviceView, setDeviceView] = useState<"desktop" | "tablet" | "mobile">("desktop");
-  const [rightPanel, setRightPanel] = useState<"library" | "layers" | null>("library");
+  const [rightPanel, setRightPanel] = useState<"library" | "layers" | "ai" | null>("library");
   
   const { addToHistory, undo, redo, canUndo, canRedo } = useEditorHistory(components);
 
@@ -165,6 +166,36 @@ const Editor = () => {
     } catch (error) {
       console.error("Error:", error);
       toast.error("Failed to add component");
+    }
+  };
+
+  const handleAIGenerate = async (type: string, content: any) => {
+    try {
+      const componentType = type === "image" ? "image" : "text";
+      const componentProps = type === "image" 
+        ? { src: content.imageUrl, alt: "AI generated image" }
+        : { content: content.content };
+
+      const newComponent = {
+        project_id: projectId,
+        component_type: componentType,
+        component_id: `ai-${Date.now()}`,
+        props: componentProps,
+        z_index: components.length,
+      };
+
+      const { data, error } = await supabase
+        .from("project_components")
+        .insert(newComponent)
+        .select()
+        .single();
+
+      if (error) throw error;
+      setComponents([...components, data]);
+      toast.success("AI content added");
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to add AI content");
     }
   };
 
@@ -458,6 +489,15 @@ const Editor = () => {
                 >
                   <LayersIcon className="h-4 w-4" />
                 </Button>
+                <Button
+                  variant={rightPanel === "ai" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-10 w-10 p-0 glass border border-border/50"
+                  onClick={() => setRightPanel(rightPanel === "ai" ? null : "ai")}
+                  title="AI Generate"
+                >
+                  <Sparkles className="h-4 w-4" />
+                </Button>
               </div>
 
               {rightPanel === "library" && (
@@ -472,6 +512,10 @@ const Editor = () => {
                   onDelete={handleDeleteComponent}
                   onReorder={setComponents}
                 />
+              )}
+
+              {rightPanel === "ai" && (
+                <AIGenerationPanel onGenerate={handleAIGenerate} />
               )}
             </motion.aside>
           )}
@@ -501,6 +545,15 @@ const Editor = () => {
               title="Layers"
             >
               <LayersIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-10 w-10 p-0 glass-strong border border-border/50 shadow-premium hover-lift"
+              onClick={() => setRightPanel("ai")}
+              title="AI Generate"
+            >
+              <Sparkles className="h-4 w-4" />
             </Button>
           </motion.div>
         )}
