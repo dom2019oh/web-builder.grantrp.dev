@@ -3,11 +3,11 @@ import logo from "@/assets/logo-white.png";
 
 const Footer = () => {
   return (
-    <footer className="relative glass glass-glow border-t border-border mt-20 overflow-hidden">
+    <footer className="relative glass border-t border-border mt-20 overflow-hidden w-full">
       {/* Aurora background effects */}
       <div className="absolute inset-0 bg-gradient-aurora-magenta-cyan opacity-5 aurora-animate pointer-events-none" style={{ backgroundSize: '200% 200%' }} />
       
-      <div className="container mx-auto px-6 py-12 relative z-10">
+      <div className="container mx-auto px-6 lg:px-12 py-12 relative z-10 max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center gap-3 mb-4">

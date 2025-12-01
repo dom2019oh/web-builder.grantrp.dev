@@ -56,11 +56,11 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-x-hidden w-full">
       <InteractiveLighting />
       <Navigation />
-      <main className="container mx-auto px-6 pt-32 pb-20 relative z-10">
-        <div className="max-w-6xl mx-auto">
+      <main className="container mx-auto px-6 lg:px-12 pt-32 pb-20 relative z-10 max-w-7xl">
+        <div className="max-w-6xl mx-auto w-full">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4 bg-gradient-aurora-magenta bg-clip-text text-transparent">
               Get in Touch

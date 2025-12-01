@@ -12,9 +12,9 @@ const Hero = () => {
       {/* Subtle grid pattern */}
       <div className="absolute inset-0 grid-pattern-subtle opacity-40" />
       
-      {/* Ambient glows */}
+      {/* Ambient glows - constrained */}
       <motion.div 
-        className="absolute top-20 left-20 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px]"
+        className="absolute top-20 left-1/4 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[100px]"
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.3, 0.5, 0.3],
@@ -26,7 +26,7 @@ const Hero = () => {
         }}
       />
       <motion.div 
-        className="absolute bottom-20 right-20 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[100px]"
+        className="absolute bottom-20 right-1/4 w-[300px] h-[300px] bg-accent/10 rounded-full blur-[100px]"
         animate={{
           scale: [1.2, 1, 1.2],
           opacity: [0.5, 0.3, 0.5],
@@ -39,7 +39,7 @@ const Hero = () => {
         }}
       />
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-6 lg:px-12 relative z-10 max-w-7xl">
         <div className="text-center max-w-5xl mx-auto">
           {/* Premium badge */}
           <motion.div
