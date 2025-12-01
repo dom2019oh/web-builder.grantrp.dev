@@ -17,11 +17,11 @@ const usageExamples = [
 
 const Pricing = () => {
   return (
-    <section id="pricing" className="py-24 relative overflow-hidden">
+    <section id="pricing" className="py-24 relative overflow-hidden w-full">
       {/* Aurora background */}
       <div className="absolute inset-0 bg-gradient-aurora-teal opacity-20 aurora-animate" style={{ backgroundSize: '200% 200%' }} />
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-6 lg:px-12 relative z-10 max-w-7xl">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">Pay As You Build</h2>
           <p className="text-xl text-foreground/70">
